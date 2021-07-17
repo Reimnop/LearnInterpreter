@@ -32,10 +32,9 @@ namespace LearnInterpreter
                     continue;
                 }
 
-                if (currentChar == '/' && Peek() == '/') // comment handling
+                if (char.IsDigit((char)currentChar))
                 {
-                    SkipComment();
-                    continue;
+                    return new Token(TokenType.Integer, Integer());
                 }
 
                 if (char.IsLetter((char)currentChar))
@@ -43,75 +42,47 @@ namespace LearnInterpreter
                     return Identifier();
                 }
 
-                if (currentChar == '{')
+                if (currentChar == '/' && Peek() == '/') // comment handling
                 {
-                    Advance();
-                    return new Token(TokenType.OpenBracket, "{");
+                    SkipComment();
+                    continue;
                 }
 
-                if (currentChar == '}')
+                switch (currentChar)
                 {
-                    Advance();
-                    return new Token(TokenType.CloseBracket, "}");
-                }
-
-                if (currentChar == '=')
-                {
-                    Advance();
-                    return new Token(TokenType.Assign, "=");
-                }
-
-                if (currentChar == ';')
-                {
-                    Advance();
-                    return new Token(TokenType.Semicolon, ";");
-                }
-
-                if (char.IsDigit((char)currentChar))
-                {
-                    return new Token(TokenType.Integer, Integer());
-                }
-
-                if (currentChar == '+')
-                {
-                    Advance();
-                    return new Token(TokenType.Plus, "+");
-                }
-
-                if (currentChar == '-')
-                {
-                    Advance();
-                    return new Token(TokenType.Minus, "-");
-                }
-
-                if (currentChar == '*')
-                {
-                    Advance();
-                    return new Token(TokenType.Mult, "*");
-                }
-
-                if (currentChar == '/')
-                {
-                    Advance();
-                    return new Token(TokenType.Div, "/");
-                }
-
-                if (currentChar == '(')
-                {
-                    Advance();
-                    return new Token(TokenType.LeftParen, "(");
-                }
-
-                if (currentChar == ')')
-                {
-                    Advance();
-                    return new Token(TokenType.RightParen, ")");
-                }
-
-                if (currentChar == '.')
-                {
-                    Advance();
-                    return new Token(TokenType.Dot, ".");
+                    case '{':
+                        Advance();
+                        return new Token(TokenType.OpenBracket, "{");
+                    case '}':
+                        Advance();
+                        return new Token(TokenType.CloseBracket, "}");
+                    case '=':
+                        Advance();
+                        return new Token(TokenType.Assign, "=");
+                    case ';':
+                        Advance();
+                        return new Token(TokenType.Semicolon, ";");
+                    case '+':
+                        Advance();
+                        return new Token(TokenType.Plus, "+");
+                    case '-':
+                        Advance();
+                        return new Token(TokenType.Minus, "-");
+                    case '*':
+                        Advance();
+                        return new Token(TokenType.Mult, "*");
+                    case '/':
+                        Advance();
+                        return new Token(TokenType.Div, "/");
+                    case '(':
+                        Advance();
+                        return new Token(TokenType.LeftParen, "(");
+                    case ')':
+                        Advance();
+                        return new Token(TokenType.RightParen, ")");
+                    case '.':
+                        Advance();
+                        return new Token(TokenType.Dot, ".");
                 }
 
                 throw new Exception("Invalid syntax!");

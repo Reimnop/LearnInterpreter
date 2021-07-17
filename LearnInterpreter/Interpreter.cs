@@ -70,25 +70,18 @@ namespace LearnInterpreter
 
         private Node Statement()
         {
-            if (currentToken.TokenType == TokenType.OpenBracket)
+            switch (currentToken.TokenType)
             {
-                return Block();
-            }
-            else if (currentToken.TokenType == TokenType.Identifier)
-            {
-                return AssignmentStatement();
-            }
-            else if (currentToken.TokenType == TokenType.Type)
-            {
-                return VariableDeclarationStatement();
-            }
-            else if (currentToken.TokenType == TokenType.Void)
-            {
-                return MethodDeclarationStatement();
-            }
-            else
-            {
-                return new NoOp(); //empty
+                case TokenType.OpenBracket:
+                    return Block();
+                case TokenType.Identifier:
+                    return AssignmentStatement();
+                case TokenType.Type:
+                    return VariableDeclarationStatement();
+                case TokenType.Void:
+                    return MethodDeclarationStatement();
+                default:
+                    return new NoOp();
             }
         }
 
