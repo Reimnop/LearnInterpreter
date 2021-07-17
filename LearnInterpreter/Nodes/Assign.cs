@@ -8,14 +8,14 @@ namespace LearnInterpreter
     public class Assign : Node
     {
         public Token Token => _token;
-        public Node Left => _left;
+        public Variable Left => _left;
         public Node Right => _right;
 
         private Token _token;
-        private Node _left;
+        private Variable _left;
         private Node _right;
 
-        public Assign(Token token, Node left, Node right)
+        public Assign(Token token, Variable left, Node right)
         {
             _token = token;
             _left = left;

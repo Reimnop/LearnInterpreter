@@ -1,9 +1,10 @@
 ﻿// this is my test program
-float a;
-float b;
+
+decimal a; 
+decimal b;
 
 a = 5;
-b = 6;
-
-a = a + 8;
 b = a + 2;
+
+a = (a + b) * 2 / 5 - b * b;
+b = b / 0;

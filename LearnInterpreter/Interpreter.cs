@@ -12,28 +12,16 @@ namespace LearnInterpreter
         private Lexer lexer;
         private Token currentToken;
 
-        private delegate object Visitor(Node node);
-        private Dictionary<Type, Visitor> visitors;
-
-        private Dictionary<string, object> globalScope = new Dictionary<string, object>();
+        private NodeVisitor nodeVisitor;
+        private SymbolTableBuilder symbolTableBuilder;
 
         public Interpreter(Lexer lexer)
         {
             this.lexer = lexer;
             currentToken = lexer.NextToken();
 
-            visitors = new Dictionary<Type, Visitor>()
-            {
-                { typeof(BinOp), VisitBinOp },
-                { typeof(UnaryOp), VisitUnaryOp },
-                { typeof(Number), VisitNumber },
-                { typeof(Compound), VisitCompound },
-                { typeof(Statements), VisitStatements },
-                { typeof(Assign), VisitAssign },
-                { typeof(Decleration), VisitDecleration },
-                { typeof(Variable), VisitVariable },
-                { typeof(NoOp), VisitNoOp }
-            };
+            nodeVisitor = new NodeVisitor();
+            symbolTableBuilder = new SymbolTableBuilder();
         }
 
         private void Eat(TokenType tokenType)
@@ -48,7 +36,7 @@ namespace LearnInterpreter
         {
             if (currentToken.TokenType == TokenType.OpenBracket)
             {
-                return CompoundStatement();
+                return Block();
             }
             else
             {
@@ -56,13 +44,13 @@ namespace LearnInterpreter
             }
         }
 
-        private Node CompoundStatement()
+        private Node Block()
         {
             Eat(TokenType.OpenBracket);
             Statements statements = StatementList();
             Eat(TokenType.CloseBracket);
 
-            return new Compound(statements);
+            return new Block(statements);
         }
 
         private Statements StatementList()
@@ -84,7 +72,7 @@ namespace LearnInterpreter
         {
             if (currentToken.TokenType == TokenType.OpenBracket)
             {
-                return CompoundStatement();
+                return Block();
             }
             else if (currentToken.TokenType == TokenType.Identifier)
             {
@@ -92,7 +80,7 @@ namespace LearnInterpreter
             }
             else if (currentToken.TokenType == TokenType.Type)
             {
-                return DeclerationStatement();
+                return DeclarationStatement();
             }
             else
             {
@@ -100,20 +88,25 @@ namespace LearnInterpreter
             }
         }
 
-        private Node DeclerationStatement()
+        private Node DeclarationStatement()
+        {
+            TypeNode type = TypeSpec();
+            Variable var = Variable();
+
+            return new Declaration(type, var);
+        }
+
+        private TypeNode TypeSpec()
         {
             Token type = currentToken;
             Eat(TokenType.Type);
 
-            Token id = currentToken;
-            Eat(TokenType.Identifier);
-
-            return new Decleration(type, id);
+            return new TypeNode(type);
         }
 
         private Node AssignmentStatement()
         {
-            Node left = Variable();
+            Variable left = Variable();
             Token op = currentToken;
             Eat(TokenType.Assign);
             Node right = Expr();
@@ -121,12 +114,12 @@ namespace LearnInterpreter
             return new Assign(op, left, right);
         }
 
-        private Node Variable()
+        private Variable Variable()
         {
-            Node node = new Variable(currentToken);
+            Variable var = new Variable(currentToken);
             Eat(TokenType.Identifier);
 
-            return node;
+            return var;
         }
 
         private Node Factor()
@@ -160,12 +153,10 @@ namespace LearnInterpreter
 
         private Node Number()
         {
-            string num = string.Empty;
-
             Token token = currentToken;
             Eat(TokenType.Integer);
 
-            num = token.Value;
+            string num = token.Value;
 
             if (currentToken.TokenType == TokenType.Dot)
             {
@@ -238,115 +229,8 @@ namespace LearnInterpreter
         public void Evaluate()
         {
             Node ast = Parse();
-            Visit(ast);
-        }
-
-        private object Visit(Node node)
-        {
-            return visitors[node.GetType()].Invoke(node);
-        }
-
-        private object VisitBinOp(Node node)
-        {
-            BinOp op = (BinOp)node;
-
-            float left = (float)Visit(op.Left);
-            float right = (float)Visit(op.Right);
-
-            switch (op.Token.TokenType)
-            {
-                case TokenType.Plus:
-                    return left + right;
-                case TokenType.Minus:
-                    return left - right;
-                case TokenType.Mult:
-                    return left * right;
-                case TokenType.Div:
-                    return left / right;
-            }
-
-            throw new Exception();
-        }
-
-        private object VisitUnaryOp(Node node)
-        {
-            UnaryOp op = (UnaryOp)node;
-
-            switch (op.Token.TokenType)
-            {
-                case TokenType.Plus:
-                    return (float)Visit(op.Expr);
-                case TokenType.Minus:
-                    return -(float)Visit(op.Expr);
-            }
-
-            throw new Exception();
-        }
-
-        private object VisitNumber(Node node)
-        {
-            Number num = (Number)node;
-            return float.Parse(num.Value);
-        }
-
-        private object VisitCompound(Node node)
-        {
-            Compound compound = (Compound)node;
-            return VisitStatements(compound.Statements);
-        }
-
-        private object VisitStatements(Node node)
-        {
-            Statements statements = (Statements)node;
-
-            foreach (Node child in statements.Children)
-            {
-                Visit(child);
-            }
-
-            return null;
-        }
-
-        private object VisitAssign(Node node)
-        {
-            Assign assign = (Assign)node;
-            Variable var = (Variable)assign.Left;
-
-            if (globalScope.ContainsKey(var.Token.Value))
-            {
-                globalScope[var.Token.Value] = Visit(assign.Right);
-            }
-            else
-            {
-                throw new Exception($"The variable {var.Token.Value} does not exist in the current context!");
-            }
-
-            return null;
-        }
-
-        private object VisitDecleration(Node node)
-        {
-            Decleration decleration = (Decleration)node;
-            globalScope.Add(decleration.IdentifierToken.Value, 0f);
-
-            return null;
-        }
-
-        private object VisitVariable(Node node)
-        {
-            Variable variable = (Variable)node;
-
-            if (globalScope.TryGetValue(variable.Token.Value, out object val))
-            {
-                return val;
-            }
-
-            throw new Exception($"The variable {variable.Token.Value} does not exist in the current context!");
-        }
-
-        private object VisitNoOp(Node node)
-        {
-            return null;
+            symbolTableBuilder.Visit(ast);
+            nodeVisitor.Visit(ast);
         }
     }
 }
