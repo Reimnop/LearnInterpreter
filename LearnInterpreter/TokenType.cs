@@ -16,6 +16,7 @@
         Assign = 11,
         Semicolon = 12,
         Dot = 13,
-        Type = 14
+        Type = 14,
+        Void = 15
     }
 }

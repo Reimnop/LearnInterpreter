@@ -44,7 +44,7 @@ namespace LearnInterpreter
             }
         }
 
-        private Node Block()
+        private Block Block()
         {
             Eat(TokenType.OpenBracket);
             Statements statements = StatementList();
@@ -80,7 +80,11 @@ namespace LearnInterpreter
             }
             else if (currentToken.TokenType == TokenType.Type)
             {
-                return DeclarationStatement();
+                return VariableDeclarationStatement();
+            }
+            else if (currentToken.TokenType == TokenType.Void)
+            {
+                return MethodDeclarationStatement();
             }
             else
             {
@@ -88,12 +92,27 @@ namespace LearnInterpreter
             }
         }
 
-        private Node DeclarationStatement()
+        private VariableDeclaration VariableDeclarationStatement()
         {
             TypeNode type = TypeSpec();
             Variable var = Variable();
 
-            return new Declaration(type, var);
+            return new VariableDeclaration(type, var);
+        }
+
+        private MethodDeclaration MethodDeclarationStatement()
+        {
+            Eat(TokenType.Void);
+
+            Token token = currentToken;
+            Eat(TokenType.Identifier);
+
+            Eat(TokenType.LeftParen);
+            Eat(TokenType.RightParen);
+
+            Block block = Block();
+
+            return new MethodDeclaration(token.Value, block);
         }
 
         private TypeNode TypeSpec()

@@ -87,7 +87,7 @@ namespace LearnInterpreter
 
         protected override object VisitDeclaration(Node node)
         {
-            Declaration Declaration = (Declaration)node;
+            VariableDeclaration Declaration = (VariableDeclaration)node;
             string typeName = Declaration.Type.Token.Value;
             string varName = Declaration.Variable.Token.Value;
 

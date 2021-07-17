@@ -21,7 +21,7 @@ namespace LearnInterpreter
                 { typeof(Block), VisitBlock },
                 { typeof(Statements), VisitStatements },
                 { typeof(Assign), VisitAssign },
-                { typeof(Declaration), VisitDeclaration },
+                { typeof(VariableDeclaration), VisitDeclaration },
                 { typeof(TypeNode), VisitTypeNode },
                 { typeof(Variable), VisitVariable },
                 { typeof(NoOp), VisitNoOp }
@@ -106,7 +106,7 @@ namespace LearnInterpreter
 
         protected virtual object VisitDeclaration(Node node)
         {
-            Declaration Declaration = (Declaration)node;
+            VariableDeclaration Declaration = (VariableDeclaration)node;
             Variable variable = Declaration.Variable;
 
             globalScope.Add(variable.Token.Value, 0f);

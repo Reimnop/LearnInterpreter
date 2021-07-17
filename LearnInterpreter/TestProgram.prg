@@ -3,8 +3,11 @@
 decimal a; 
 decimal b;
 
-a = 5;
+void setA() {
+	a = 8;
+};
+
 b = a + 2;
 
-a = (a + b) * 2 / 5 - b * b;
+a = (a + b) * 2 / 5 - b * b; // some complicated shits
 b = b / 0;

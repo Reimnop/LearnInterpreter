@@ -12,7 +12,8 @@ namespace LearnInterpreter
 
         private Dictionary<string, Token> reservedKeywords = new Dictionary<string, Token>()
         {
-            { "decimal", new Token(TokenType.Type, "decimal") }
+            { "decimal", new Token(TokenType.Type, "decimal") },
+            { "void", new Token(TokenType.Void, "void") }
         };
 
         public Lexer(string text)
