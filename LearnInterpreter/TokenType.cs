@@ -14,10 +14,16 @@
         Semicolon    = ';',
         Dot          = '.',
         Comma        = ',',
+        LessThan     = '<',
+        GreaterThan  = '>',
         Eof          = 0,
         Integer      = 1,
         Identifier   = 2,
         Type         = 3,
-        Void         = 4
+        Void         = 4,
+        If           = 5,
+        True         = 6,
+        False        = 7,
+        Equal        = 8
     }
 }

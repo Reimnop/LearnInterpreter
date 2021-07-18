@@ -5,19 +5,16 @@ namespace LearnInterpreter
 {
     public class ActivationRecord
     {
-        public string Name => _name;
         public ARType Type => _type;
         public int NestingLevel => _nestingLevel;
 
-        private string _name;
         private ARType _type;
         private int _nestingLevel;
 
         private Dictionary<string, object> members = new Dictionary<string, object>();
 
-        public ActivationRecord(string name, ARType type, int nestingLevel)
+        public ActivationRecord(ARType type, int nestingLevel)
         {
-            _name = name;
             _type = type;
             _nestingLevel = nestingLevel;
         }
@@ -43,7 +40,7 @@ namespace LearnInterpreter
         {
             const int align = 10;
 
-            string s = $"{_nestingLevel} : {_type} {_name}{Environment.NewLine}";
+            string s = $"{_nestingLevel} : {_type}{Environment.NewLine}";
             foreach (KeyValuePair<string, object> kvp in members)
             {
                 s += kvp.Key;

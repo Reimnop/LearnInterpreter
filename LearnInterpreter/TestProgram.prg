@@ -12,7 +12,10 @@ decimal b = 2;
 decimal c = a + b;
 decimal d = a * b / (10 + a);
 
-foo(d);
+if (c < d) {
+	decimal abc = 4;
+	foo(abc);
+};
 
 decimal f;
 

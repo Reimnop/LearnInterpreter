@@ -17,7 +17,10 @@ namespace LearnInterpreter
         private Dictionary<string, Token> reservedKeywords = new Dictionary<string, Token>()
         {
             { "decimal", new Token(TokenType.Type, "decimal") },
-            { "void", new Token(TokenType.Void, "void") }
+            { "void", new Token(TokenType.Void, "void") },
+            { "if", new Token(TokenType.If, "if") },
+            { "true", new Token(TokenType.True, "true") },
+            { "false", new Token(TokenType.False, "false") }
         };
 
         public Lexer(string text)
@@ -36,6 +39,12 @@ namespace LearnInterpreter
                     continue;
                 }
 
+                if (_currentChar == '/' && Peek() == '/') // comment handling
+                {
+                    SkipComment();
+                    continue;
+                }
+
                 if (char.IsDigit((char)_currentChar))
                 {
                     return new Token(TokenType.Integer, Integer(), line, column);
@@ -46,10 +55,9 @@ namespace LearnInterpreter
                     return Identifier();
                 }
 
-                if (_currentChar == '/' && Peek() == '/') // comment handling
+                if (_currentChar == '=' && Peek() == '=')
                 {
-                    SkipComment();
-                    continue;
+                    return new Token(TokenType.Equal, "==", line, column);
                 }
 
                 //deal with single char tokens

@@ -19,7 +19,7 @@ namespace LearnInterpreter
         {
             ProgramNode program = (ProgramNode)node;
 
-            callStack.Push(new ActivationRecord("Program", ARType.Program, 1));
+            callStack.Push(new ActivationRecord(ARType.Program, 1));
             Visit(program.Node);
 
             Console.WriteLine(callStack);
@@ -126,9 +126,9 @@ namespace LearnInterpreter
             MethodCall call = (MethodCall)node;
             string methodName = call.MethodName;
 
-            ActivationRecord ar = new ActivationRecord(methodName, ARType.Method, 2);
-
             MethodSymbol symbol = call.Symbol;
+            ActivationRecord ar = new ActivationRecord(ARType.Method, symbol.ScopeLevel + 1);
+
             for (int i = 0; i < call.Parameters.Count; i++)
             {
                 ar[symbol.Parameters[i].Name] = Visit(call.Parameters[i]);
@@ -141,6 +141,59 @@ namespace LearnInterpreter
             callStack.Pop();
 
             return null;
+        }
+
+        protected override object VisitIfNode(Node node)
+        {
+            IfNode ifNode = (IfNode)node;
+
+            if ((bool)Visit(ifNode.Boolean))
+            {
+                ActivationRecord ar = new ActivationRecord(ARType.If, ifNode.ScopeLevel + 1);
+
+                callStack.Push(ar);
+                Visit(ifNode.Body);
+
+                Console.WriteLine(callStack);
+                callStack.Pop();
+            }
+
+            return null;
+        }
+
+        protected override object VisitBooleanNode(Node node)
+        {
+            BooleanNode boolean = (BooleanNode)node;
+
+            if (boolean.Condition == Condition.True)
+            {
+                return true;
+            }
+
+            if (boolean.Condition == Condition.False)
+            {
+                return false;
+            }
+
+            return Visit(boolean.ConditionNode);
+        }
+
+        protected override object VisitConditionNode(Node node)
+        {
+            ConditionNode condition = (ConditionNode)node;
+
+            Node left = condition.Left;
+            Node right = condition.Right;
+
+            switch (condition.Op.TokenType)
+            {
+                case TokenType.GreaterThan:
+                    return (float)Visit(left) > (float)Visit(right);
+                case TokenType.LessThan:
+                    return (float)Visit(left) < (float)Visit(right);
+                default:
+                    return (float)Visit(left) == (float)Visit(right);
+            }
         }
 
         protected override object VisitTypeNode(Node node)

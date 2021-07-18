@@ -72,8 +72,6 @@ namespace LearnInterpreter
         {
             switch (currentToken.TokenType)
             {
-                case TokenType.OpenBracket:
-                    return Block();
                 case TokenType.Identifier:
                     if (lexer.CurrentChar == '(')
                     {
@@ -84,9 +82,66 @@ namespace LearnInterpreter
                     return VariableDeclarationStatement();
                 case TokenType.Void:
                     return MethodDeclarationStatement();
+                case TokenType.If:
+                    return IfStatement();
                 default:
                     return new NoOp();
             }
+        }
+
+        private IfNode IfStatement()
+        {
+            Eat(TokenType.If);
+            Eat(TokenType.LeftParen);
+
+            BooleanNode boolean = Boolean();
+
+            Eat(TokenType.RightParen);
+
+            Block block = Block();
+
+            return new IfNode(boolean, block);
+        }
+
+        private BooleanNode Boolean()
+        {
+            Token token = currentToken;
+            if (token.TokenType == TokenType.True)
+            {
+                Eat(TokenType.True);
+                return new BooleanNode(Condition.True);
+            }
+
+            if (token.TokenType == TokenType.False)
+            {
+                Eat(TokenType.False);
+                return new BooleanNode(Condition.False);
+            }
+
+            return new BooleanNode(Condition.NeedEval, ConditionNode());
+        }
+
+        private ConditionNode ConditionNode()
+        {
+            Node left = Expr();
+
+            Token op = currentToken;
+            switch (op.TokenType)
+            {
+                case TokenType.GreaterThan:
+                    Eat(TokenType.GreaterThan);
+                    break;
+                case TokenType.LessThan:
+                    Eat(TokenType.LessThan);
+                    break;
+                default:
+                    Eat(TokenType.Equal);
+                    break;
+            }
+
+            Node right = Expr();
+
+            return new ConditionNode(left, right, op);
         }
 
         private MethodCall MethodCallStatement()

@@ -1,7 +1,10 @@
 Program              : StatementList | Block
 Block                : OpenBracket StatementList CloseBracket
 StatementList        : Statement | Statement Semicolon StatementList
-Statement            : Block | Method | MethodCall | AssignmentStatement | DeclarationStatement | Empty
+Statement            : Method | MethodCall | IfStatement | AssignmentStatement | DeclarationStatement | Empty
+IfStatement          : if LeftParent Boolean RightParen Block
+Boolean              : (true | false) | Condition
+Condition            : Expr (== | > | <) Expr
 MethodCall           : Identifier LeftParen (Expr (Comma Expr)*)? RightParen
 Method               : void Identifier LeftParen (ParameterList)? RightParen Block
 ParameterList        : Parameter | Parameter Comma ParameterList

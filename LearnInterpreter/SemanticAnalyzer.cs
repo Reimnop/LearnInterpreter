@@ -15,12 +15,12 @@ namespace LearnInterpreter
         {
             ProgramNode program = (ProgramNode)node;
 
-            Console.WriteLine("Entering scope: global");
+            Console.WriteLine("Entering scope: 1");
 
-            currentScope = new ScopedSymbolTable("global", 1);
+            currentScope = new ScopedSymbolTable(1);
             Visit(program.Node);
             
-            Console.WriteLine("Leaving scope: global");
+            Console.WriteLine("Leaving scope: 1");
             Console.WriteLine(currentScope);
 
             return null;
@@ -135,8 +135,8 @@ namespace LearnInterpreter
 
             currentScope.Define(methodSymbol);
 
-            Console.WriteLine($"Entering scope: {methodName}");
-            currentScope = new ScopedSymbolTable(methodName, currentScope.ScopeLevel + 1, currentScope);
+            Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
+            currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
 
             foreach (Parameter param in declaration.Parameters.Children)
             {
@@ -151,7 +151,7 @@ namespace LearnInterpreter
 
             Visit(declaration.Block);
             
-            Console.WriteLine($"Leaving scope: {methodName}");
+            Console.WriteLine($"Leaving scope: {currentScope.ScopeLevel}");
             Console.WriteLine(currentScope);
             currentScope = currentScope.EnclosingScope;
 
@@ -185,6 +185,34 @@ namespace LearnInterpreter
 
             call.Symbol = (MethodSymbol)currentScope.Lookup(call.MethodName);
 
+            return null;
+        }
+
+        protected override object VisitIfNode(Node node)
+        {
+            IfNode ifNode = (IfNode)node;
+
+            ifNode.ScopeLevel = currentScope.ScopeLevel;
+
+            Visit(ifNode.Boolean);
+
+            Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
+            currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
+            Visit(ifNode.Body);
+            Console.WriteLine($"Leaving scope {currentScope.ScopeLevel}");
+            Console.WriteLine(currentScope);
+            currentScope = currentScope.EnclosingScope;
+
+            return null;
+        }
+
+        protected override object VisitBooleanNode(Node node)
+        {
+            return null;
+        }
+
+        protected override object VisitConditionNode(Node node)
+        {
             return null;
         }
     }

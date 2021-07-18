@@ -4,6 +4,7 @@
     {
         public string Name => _name;
         public Symbol Type => _type;
+        public int ScopeLevel;
 
         private string _name;
         private Symbol _type;

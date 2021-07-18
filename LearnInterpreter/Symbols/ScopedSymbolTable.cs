@@ -6,28 +6,20 @@ namespace LearnInterpreter
     public class ScopedSymbolTable
     {
         public ScopedSymbolTable EnclosingScope => _enclosingScope;
-        public string ScopeName => _scopeName;
         public int ScopeLevel => _scopeLevel;
 
         private ScopedSymbolTable _enclosingScope;
-        private string _scopeName;
         private int _scopeLevel;
 
         private Dictionary<string, Symbol> symbols = new Dictionary<string, Symbol>();
 
-        public ScopedSymbolTable(string name, int level, ScopedSymbolTable enclosingScope = null)
+        public ScopedSymbolTable(int level, ScopedSymbolTable enclosingScope = null)
         {
-            _scopeName = name;
             _scopeLevel = level;
             _enclosingScope = enclosingScope;
 
             //init built in type symbols
             Define(new BuiltinTypeSymbol("decimal"));
-        }
-
-        public bool TryDefine(Symbol symbol)
-        {
-            return symbols.TryAdd(symbol.Name, symbol);
         }
 
         public bool TryLookup(string name, out Symbol symbol, bool currentScopeOnly = false)
@@ -47,6 +39,7 @@ namespace LearnInterpreter
 
         public void Define(Symbol symbol)
         {
+            symbol.ScopeLevel = _scopeLevel;
             symbols.Add(symbol.Name, symbol);
         }
 
@@ -71,9 +64,8 @@ namespace LearnInterpreter
 
             string s = 
                 $"SCOPED SYMBOL TABLE{Environment.NewLine}" +
-                $"Name: {_scopeName}{Environment.NewLine}" +
                 $"Level: {_scopeLevel}{Environment.NewLine}" +
-                $"Enclosing scope: {(_enclosingScope != null ? _enclosingScope.ScopeName : "None")}{Environment.NewLine}" +
+                $"Enclosing scope: {(_enclosingScope != null ? _enclosingScope.ScopeLevel.ToString() : "None")}{Environment.NewLine}" +
                 $"================================{Environment.NewLine}";
             foreach (Symbol symbol in symbols.Values)
             {
