@@ -123,6 +123,23 @@ namespace LearnInterpreter
 
         protected override object VisitMethodCall(Node node)
         {
+            MethodCall call = (MethodCall)node;
+            string methodName = call.MethodName;
+
+            ActivationRecord ar = new ActivationRecord(methodName, ARType.Method, 2);
+
+            MethodSymbol symbol = call.Symbol;
+            for (int i = 0; i < call.Parameters.Count; i++)
+            {
+                ar[symbol.Parameters[i].Name] = Visit(call.Parameters[i]);
+            }
+
+            callStack.Push(ar);
+            Visit(symbol.Body);
+
+            Console.WriteLine(callStack);
+            callStack.Pop();
+
             return null;
         }
 

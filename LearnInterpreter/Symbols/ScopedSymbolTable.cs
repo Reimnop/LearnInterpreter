@@ -73,6 +73,7 @@ namespace LearnInterpreter
                 $"SCOPED SYMBOL TABLE{Environment.NewLine}" +
                 $"Name: {_scopeName}{Environment.NewLine}" +
                 $"Level: {_scopeLevel}{Environment.NewLine}" +
+                $"Enclosing scope: {(_enclosingScope != null ? _enclosingScope.ScopeName : "None")}{Environment.NewLine}" +
                 $"================================{Environment.NewLine}";
             foreach (Symbol symbol in symbols.Values)
             {

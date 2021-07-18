@@ -131,7 +131,7 @@ namespace LearnInterpreter
             MethodDeclaration declaration = (MethodDeclaration)node;
 
             string methodName = declaration.MethodName;
-            MethodSymbol methodSymbol = new MethodSymbol(methodName);
+            MethodSymbol methodSymbol = new MethodSymbol(methodName, declaration.Block);
 
             currentScope.Define(methodSymbol);
 
@@ -182,6 +182,8 @@ namespace LearnInterpreter
             {
                 Visit(param);
             }
+
+            call.Symbol = (MethodSymbol)currentScope.Lookup(call.MethodName);
 
             return null;
         }

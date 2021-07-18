@@ -8,6 +8,8 @@ namespace LearnInterpreter
         public List<Node> Parameters => _parameters;
         public Token Token => _token;
 
+        public MethodSymbol Symbol = null;
+
         private string _methodName;
         private List<Node> _parameters;
         private Token _token;

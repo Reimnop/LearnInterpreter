@@ -4,11 +4,13 @@ namespace LearnInterpreter
 {
     public class MethodSymbol : Symbol
     {
+        public Block Body;
         public List<VariableSymbol> Parameters;
 
-        public MethodSymbol(string name, List<VariableSymbol> parameters = null) : base(name)
+        public MethodSymbol(string name, Block body, List<VariableSymbol> parameters = null) : base(name)
         {
             Parameters = parameters ?? new List<VariableSymbol>();
+            Body = body;
         }
     }
 }

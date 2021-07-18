@@ -2,6 +2,7 @@
 {
     public enum ARType
     {
-        Program
+        Program,
+        Method
     }
 }
