@@ -16,7 +16,7 @@ namespace LearnInterpreter
 
         private Dictionary<string, Token> reservedKeywords = new Dictionary<string, Token>()
         {
-            { "decimal", new Token(TokenType.Type, "decimal") },
+            { "var", new Token(TokenType.Var, "var") },
             { "void", new Token(TokenType.Void, "void") },
             { "if", new Token(TokenType.If, "if") },
             { "true", new Token(TokenType.True, "true") },
@@ -53,6 +53,11 @@ namespace LearnInterpreter
                 if (char.IsLetter((char)_currentChar))
                 {
                     return Identifier();
+                }
+
+                if (_currentChar == '"')
+                {
+                    return String();
                 }
 
                 if (_currentChar == '=' && Peek() == '=')
@@ -92,10 +97,25 @@ namespace LearnInterpreter
 
             if (reservedKeywords.TryGetValue(result, out Token token))
             {
-                return token;
+                return token.CopyNewPos(line, column);
             }
 
             return new Token(TokenType.Identifier, result, line, column);
+        }
+
+        private Token String()
+        {
+            string result = string.Empty;
+
+            Advance();
+            while (_currentChar != null && _currentChar != '"')
+            {
+                result += _currentChar;
+                Advance();
+            }
+            Advance();
+
+            return new Token(TokenType.String, result, line, column);
         }
 
         private char? Peek()

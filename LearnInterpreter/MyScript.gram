@@ -8,8 +8,8 @@ Condition            : Expr (== | > | <) Expr
 MethodCall           : Identifier LeftParen (Expr (Comma Expr)*)? RightParen
 Method               : void Identifier LeftParen (ParameterList)? RightParen Block
 ParameterList        : Parameter | Parameter Comma ParameterList
-Parameter            : Type Identifier
-DeclarationStatement : Type Variable (Assign Expr)?
+Parameter            : Identifier
+DeclarationStatement : var Variable (Assign Expr)?
 AssignmentStatement  : Variable Assign Expr
 Empty                : 
 Expr                 : Term ((Plus | Minus) Term)*

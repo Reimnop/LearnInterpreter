@@ -18,8 +18,25 @@ namespace LearnInterpreter
             _scopeLevel = level;
             _enclosingScope = enclosingScope;
 
-            //init built in type symbols
-            Define(new BuiltinTypeSymbol("decimal"));
+            Define(new BuiltinMethodSymbol("print", Builtin_Print));
+            Define(new BuiltinMethodSymbol("println", Builtin_PrintLine));
+        }
+
+        private void Builtin_Print(object[] parameters)
+        {
+            foreach (object param in parameters)
+            {
+                Console.Write(param);
+            }
+        }
+
+        private void Builtin_PrintLine(object[] parameters)
+        {
+            foreach (object param in parameters)
+            {
+                Console.Write(param);
+            }
+            Console.WriteLine();
         }
 
         public bool TryLookup(string name, out Symbol symbol, bool currentScopeOnly = false)
@@ -74,7 +91,7 @@ namespace LearnInterpreter
                 {
                     s += " ";
                 }
-                s += $" : {(symbol.Type != null ? symbol.Type.Name : "None")}{Environment.NewLine}";
+                s += $" : {(symbol is MethodSymbol ? "Method" : "Variable")}{Environment.NewLine}";
             }
 
             return s;

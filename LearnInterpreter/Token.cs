@@ -20,14 +20,14 @@
             _column = column;
         }
 
-        public int AsInteger()
-        {
-            return int.Parse(_value);
-        }
-
         public float AsFloat()
         {
             return float.Parse(_value);
+        }
+
+        public Token CopyNewPos(int line, int column)
+        {
+            return new Token(_tokenType, _value, line, column);
         }
 
         public override string ToString()

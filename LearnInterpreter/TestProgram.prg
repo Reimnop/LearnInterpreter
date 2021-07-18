@@ -1,23 +1,27 @@
 ﻿// this is my test program
 
-void foo(decimal bar) {
+void foo(var bar) {
 	// do stuff here
-	decimal foz = bar * bar;
-	decimal baz = foz / 4;
+	var foz = bar * bar;
+	var baz = foz / 4;
 };
 
-decimal a = 8; 
-decimal b = 2;
+var a = 8; 
+var b = 2;
 
-decimal c = a + b;
-decimal d = a * b / (10 + a);
+var c = a + b;
+var d = a * b / (10 + a);
 
 if (c < d) {
-	decimal abc = 4;
+	var abc = 4;
 	foo(abc);
 };
 
-decimal f;
+var f;
 
 f = a * b;
 f = c + f;
+
+var g = "abc";
+
+println(a + b);

@@ -22,7 +22,9 @@ namespace LearnInterpreter
             callStack.Push(new ActivationRecord(ARType.Program, 1));
             Visit(program.Node);
 
+#if PRINT_DEBUG
             Console.WriteLine(callStack);
+#endif
             callStack.Pop();
             return null;
         }
@@ -68,6 +70,12 @@ namespace LearnInterpreter
         {
             Number num = (Number)node;
             return float.Parse(num.Value);
+        }
+
+        protected override object VisitString(Node node)
+        {
+            StringNode stringNode = (StringNode)node;
+            return stringNode.Value;
         }
 
         protected override object VisitBlock(Node node)
@@ -126,19 +134,37 @@ namespace LearnInterpreter
             MethodCall call = (MethodCall)node;
             string methodName = call.MethodName;
 
-            MethodSymbol symbol = call.Symbol;
-            ActivationRecord ar = new ActivationRecord(ARType.Method, symbol.ScopeLevel + 1);
+            Symbol symbol = call.Symbol;
 
-            for (int i = 0; i < call.Parameters.Count; i++)
+            if (symbol is MethodSymbol)
             {
-                ar[symbol.Parameters[i].Name] = Visit(call.Parameters[i]);
-            }
+                MethodSymbol methodSymbol = (MethodSymbol)symbol;
 
-            callStack.Push(ar);
-            Visit(symbol.Body);
+                ActivationRecord ar = new ActivationRecord(ARType.Method, symbol.ScopeLevel + 1);
+                for (int i = 0; i < call.Parameters.Count; i++)
+                {
+                    ar[methodSymbol.Parameters[i].Name] = Visit(call.Parameters[i]);
+                }
+                callStack.Push(ar);
+                Visit(methodSymbol.Body);
 
+#if PRINT_DEBUG
             Console.WriteLine(callStack);
-            callStack.Pop();
+#endif
+                callStack.Pop();
+            }
+            else if (symbol is BuiltinMethodSymbol)
+            {
+                BuiltinMethodSymbol methodSymbol = (BuiltinMethodSymbol)symbol;
+
+                object[] parameters = new object[call.Parameters.Count];
+                for (int i = 0; i < call.Parameters.Count; i++)
+                {
+                    parameters[i] = Visit(call.Parameters[i]);
+                }
+
+                methodSymbol.Method.Invoke(parameters);
+            }
 
             return null;
         }
@@ -154,7 +180,9 @@ namespace LearnInterpreter
                 callStack.Push(ar);
                 Visit(ifNode.Body);
 
+#if PRINT_DEBUG
                 Console.WriteLine(callStack);
+#endif
                 callStack.Pop();
             }
 
@@ -194,12 +222,6 @@ namespace LearnInterpreter
                 default:
                     return (float)Visit(left) == (float)Visit(right);
             }
-        }
-
-        protected override object VisitTypeNode(Node node)
-        {
-            TypeNode type = (TypeNode)node;
-            return type.Token.Value;
         }
 
         protected override object VisitVariable(Node node)

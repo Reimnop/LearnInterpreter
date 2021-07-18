@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace LearnInterpreter
+﻿namespace LearnInterpreter
 {
     public class SemanticAnalyzer : NodeVisitor
     {
@@ -15,13 +13,15 @@ namespace LearnInterpreter
         {
             ProgramNode program = (ProgramNode)node;
 
+#if PRINT_DEBUG
             Console.WriteLine("Entering scope: 1");
-
+#endif
             currentScope = new ScopedSymbolTable(1);
             Visit(program.Node);
-            
+#if PRINT_DEBUG
             Console.WriteLine("Leaving scope: 1");
             Console.WriteLine(currentScope);
+#endif
 
             return null;
         }
@@ -76,12 +76,12 @@ namespace LearnInterpreter
             return null;
         }
 
-        protected override object VisitNoOp(Node node)
+        protected override object VisitString(Node node)
         {
             return null;
         }
 
-        protected override object VisitTypeNode(Node node)
+        protected override object VisitNoOp(Node node)
         {
             return null;
         }
@@ -108,21 +108,14 @@ namespace LearnInterpreter
         protected override object VisitVariableDeclaration(Node node)
         {
             VariableDeclaration declaration = (VariableDeclaration)node;
-            string typeName = declaration.Type.Token.Value;
             string varName = declaration.Variable.Token.Value;
-
-            Symbol typeSymbol;
-            if (!currentScope.TryLookup(typeName, out typeSymbol))
-            {
-                ThrowError(ErrorCodes.IdentifierNotFound, declaration.Type.Token);
-            }
 
             if (currentScope.TryLookup(varName, out _, true))
             {
                 ThrowError(ErrorCodes.DuplicateIdentifier, declaration.Variable.Token);
             }
 
-            currentScope.Define(new VariableSymbol(varName, (BuiltinTypeSymbol)typeSymbol));
+            currentScope.Define(new VariableSymbol(varName));
             return null;
         }
 
@@ -134,25 +127,27 @@ namespace LearnInterpreter
             MethodSymbol methodSymbol = new MethodSymbol(methodName, declaration.Block);
 
             currentScope.Define(methodSymbol);
-
+#if PRINT_DEBUG
             Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
+#endif
             currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
 
             foreach (Parameter param in declaration.Parameters.Children)
             {
-                BuiltinTypeSymbol paramType = (BuiltinTypeSymbol)currentScope.Lookup(param.Type.Token.Value);
                 string paramName = param.Variable.Token.Value;
 
-                VariableSymbol variableSymbol = new VariableSymbol(paramName, paramType);
+                VariableSymbol variableSymbol = new VariableSymbol(paramName);
                 currentScope.Define(variableSymbol);
 
                 methodSymbol.Parameters.Add(variableSymbol);
             }
 
             Visit(declaration.Block);
-            
+
+#if PRINT_DEBUG
             Console.WriteLine($"Leaving scope: {currentScope.ScopeLevel}");
             Console.WriteLine(currentScope);
+#endif
             currentScope = currentScope.EnclosingScope;
 
             return null;
@@ -163,16 +158,19 @@ namespace LearnInterpreter
             MethodCall call = (MethodCall)node;
 
             //checks
-            MethodSymbol methodSymbol = null;
-            if (!currentScope.TryLookup(call.MethodName, out Symbol symbol))
+            Symbol symbol;
+            if (!currentScope.TryLookup(call.MethodName, out symbol))
             {
                 ThrowError(ErrorCodes.IdentifierNotFound, call.Token);
             }
-            else
+
+            if (symbol is BuiltinMethodSymbol)
             {
-                methodSymbol = (MethodSymbol)symbol;
+                call.Symbol = symbol;
+                return null;
             }
 
+            MethodSymbol methodSymbol = (MethodSymbol)symbol;
             if (call.Parameters.Count != methodSymbol.Parameters.Count)
             {
                 ThrowError(ErrorCodes.ParamCountMismatch, call.Token);
@@ -183,7 +181,7 @@ namespace LearnInterpreter
                 Visit(param);
             }
 
-            call.Symbol = (MethodSymbol)currentScope.Lookup(call.MethodName);
+            call.Symbol = symbol;
 
             return null;
         }
@@ -196,11 +194,16 @@ namespace LearnInterpreter
 
             Visit(ifNode.Boolean);
 
+#if PRINT_DEBUG
             Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
+#endif
             currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
             Visit(ifNode.Body);
+
+#if PRINT_DEBUG
             Console.WriteLine($"Leaving scope {currentScope.ScopeLevel}");
             Console.WriteLine(currentScope);
+#endif
             currentScope = currentScope.EnclosingScope;
 
             return null;

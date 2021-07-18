@@ -78,7 +78,7 @@ namespace LearnInterpreter
                         return MethodCallStatement();
                     }
                     return AssignmentStatement();
-                case TokenType.Type:
+                case TokenType.Var:
                     return VariableDeclarationStatement();
                 case TokenType.Void:
                     return MethodDeclarationStatement();
@@ -169,7 +169,8 @@ namespace LearnInterpreter
 
         private VariableDeclaration VariableDeclarationStatement()
         {
-            TypeNode type = TypeSpec();
+            Eat(TokenType.Var);
+
             Variable var = Variable();
 
             Node assignment = null;
@@ -179,7 +180,7 @@ namespace LearnInterpreter
                 assignment = Expr();
             }
 
-            return new VariableDeclaration(type, var, assignment);
+            return new VariableDeclaration(var, assignment);
         }
 
         private MethodDeclaration MethodDeclarationStatement()
@@ -222,18 +223,10 @@ namespace LearnInterpreter
 
         private Parameter Parameter()
         {
-            TypeNode type = TypeSpec();
+            Eat(TokenType.Var);
             Variable var = Variable();
 
-            return new Parameter(type, var);
-        }
-
-        private TypeNode TypeSpec()
-        {
-            Token type = currentToken;
-            Eat(TokenType.Type);
-
-            return new TypeNode(type);
+            return new Parameter(var);
         }
 
         private Node AssignmentStatement()
@@ -277,6 +270,12 @@ namespace LearnInterpreter
             {
                 Eat(currentToken.TokenType);
                 return new UnaryOp(token, Factor());
+            }
+
+            if (currentToken.TokenType == TokenType.String)
+            {
+                Eat(TokenType.String);
+                return new StringNode(token.Value);
             }
 
             Node var = Variable();

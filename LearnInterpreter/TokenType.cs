@@ -19,7 +19,7 @@
         Eof          = 0,
         Integer      = 1,
         Identifier   = 2,
-        Type         = 3,
+        Var         = 3,
         Void         = 4,
         If           = 5,
         True         = 6,
