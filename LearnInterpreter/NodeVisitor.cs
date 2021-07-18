@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace LearnInterpreter
 {
@@ -15,13 +14,15 @@ namespace LearnInterpreter
         {
             visitors = new Dictionary<Type, Visitor>()
             {
+                { typeof(ProgramNode), VisitProgram },
                 { typeof(BinOp), VisitBinOp },
                 { typeof(UnaryOp), VisitUnaryOp },
                 { typeof(Number), VisitNumber },
                 { typeof(Block), VisitBlock },
                 { typeof(Statements), VisitStatements },
                 { typeof(Assign), VisitAssign },
-                { typeof(VariableDeclaration), VisitDeclaration },
+                { typeof(VariableDeclaration), VisitVariableDeclaration },
+                { typeof(MethodDeclaration), VisitMethodDeclaration },
                 { typeof(TypeNode), VisitTypeNode },
                 { typeof(Variable), VisitVariable },
                 { typeof(NoOp), VisitNoOp }
@@ -31,6 +32,13 @@ namespace LearnInterpreter
         public object Visit(Node node)
         {
             return visitors[node.GetType()].Invoke(node);
+        }
+
+        protected virtual object VisitProgram(Node node)
+        {
+            ProgramNode program = (ProgramNode)node;
+            Visit(program.Node);
+            return null;
         }
 
         protected virtual object VisitBinOp(Node node)
@@ -104,13 +112,24 @@ namespace LearnInterpreter
             return null;
         }
 
-        protected virtual object VisitDeclaration(Node node)
+        protected virtual object VisitVariableDeclaration(Node node)
         {
-            VariableDeclaration Declaration = (VariableDeclaration)node;
-            Variable variable = Declaration.Variable;
+            VariableDeclaration declaration = (VariableDeclaration)node;
+            Variable variable = declaration.Variable;
 
-            globalScope.Add(variable.Token.Value, 0f);
+            object assign = 0f;
+            if (declaration.Assignment != null)
+            {
+                assign = Visit(declaration.Assignment);
+            }
 
+            globalScope.Add(variable.Token.Value, assign);
+
+            return null;
+        }
+
+        protected virtual object VisitMethodDeclaration(Node node)
+        {
             return null;
         }
 

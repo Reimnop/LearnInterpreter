@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LearnInterpreter
+﻿namespace LearnInterpreter
 {
     public class MethodDeclaration : Node
     {
         public string MethodName => _methodName;
+        public Parameters Parameters => _parameters;
         public Block Block => _block;
 
         private string _methodName;
+        private Parameters _parameters;
         private Block _block;
 
-        public MethodDeclaration(string name, Block block)
+        public MethodDeclaration(string name, Parameters parameters, Block block)
         {
             _methodName = name;
+            _parameters = parameters;
             _block = block;
         }
     }

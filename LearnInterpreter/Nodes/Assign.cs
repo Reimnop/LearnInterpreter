@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LearnInterpreter
+﻿namespace LearnInterpreter
 {
     //represents assignment "a = 42;"
     public class Assign : Node

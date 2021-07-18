@@ -2,12 +2,14 @@ Program              : StatementList | Block
 Block                : OpenBracket StatementList CloseBracket
 StatementList        : Statement | Statement Semicolon StatementList
 Statement            : Block | Method | AssignmentStatement | DeclarationStatement | Empty
-Method               : void Identifier LeftParen RightParen Block
-DeclarationStatement : Type Variable
+Method               : void Identifier LeftParen (ParameterList)? RightParen Block
+ParameterList        : Parameter | Parameter Comma ParameterList
+Parameter            : Type Identifier
+DeclarationStatement : Type Variable (Assign Expr)?
 AssignmentStatement  : Variable Assign Expr
 Empty                : 
 Expr                 : Term ((Plus | Minus) Term)*
-Term                 : Factor ((MUL | DIV) Factor)*
+Term                 : Factor ((Mult | Div) Factor)*
 Factor               : Plus Factor
                      | Minus Factor
                      | Number

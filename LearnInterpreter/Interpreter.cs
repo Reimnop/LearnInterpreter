@@ -13,7 +13,7 @@ namespace LearnInterpreter
         private Token currentToken;
 
         private NodeVisitor nodeVisitor;
-        private SymbolTableBuilder symbolTableBuilder;
+        private SemanticAnalyzer semanticAnalyzer;
 
         public Interpreter(Lexer lexer)
         {
@@ -21,26 +21,36 @@ namespace LearnInterpreter
             currentToken = lexer.NextToken();
 
             nodeVisitor = new NodeVisitor();
-            symbolTableBuilder = new SymbolTableBuilder();
+            semanticAnalyzer = new SemanticAnalyzer();
         }
 
+        #region Parser
         private void Eat(TokenType tokenType)
         {
             if (tokenType == currentToken.TokenType)
+            {
                 currentToken = lexer.NextToken();
+            }
             else
-                throw new Exception($"Expected {tokenType}, got {currentToken.TokenType}");
+            {
+                ThrowError(ErrorCodes.UnexpectedToken, currentToken);
+            }
+        }
+
+        private void ThrowError(string errorCode, Token token)
+        {
+            throw new ParserError(errorCode, token, $"{errorCode} -> {token}");
         }
 
         private Node Program()
         {
             if (currentToken.TokenType == TokenType.OpenBracket)
             {
-                return Block();
+                return new ProgramNode(Block());
             }
             else
             {
-                return StatementList();
+                return new ProgramNode(StatementList());
             }
         }
 
@@ -90,7 +100,14 @@ namespace LearnInterpreter
             TypeNode type = TypeSpec();
             Variable var = Variable();
 
-            return new VariableDeclaration(type, var);
+            Node assignment = null;
+            if (currentToken.TokenType == TokenType.Assign)
+            {
+                Eat(TokenType.Assign);
+                assignment = Expr();
+            }
+
+            return new VariableDeclaration(type, var, assignment);
         }
 
         private MethodDeclaration MethodDeclarationStatement()
@@ -101,11 +118,42 @@ namespace LearnInterpreter
             Eat(TokenType.Identifier);
 
             Eat(TokenType.LeftParen);
-            Eat(TokenType.RightParen);
+
+            Parameters parameters = null;
+            if (currentToken.TokenType == TokenType.RightParen)
+            {
+                Eat(TokenType.RightParen);
+            }
+            else
+            {
+                parameters = ParameterList();
+                Eat(TokenType.RightParen);
+            }
 
             Block block = Block();
 
-            return new MethodDeclaration(token.Value, block);
+            return new MethodDeclaration(token.Value, parameters, block);
+        }
+
+        private Parameters ParameterList()
+        {
+            List<Parameter> parameters = new List<Parameter>() { Parameter() };
+
+            while (currentToken.TokenType == TokenType.Comma)
+            {
+                Eat(TokenType.Comma);
+                parameters.Add(Parameter());
+            }
+
+            return new Parameters(parameters);
+        }
+
+        private Parameter Parameter()
+        {
+            TypeNode type = TypeSpec();
+            Variable var = Variable();
+
+            return new Parameter(type, var);
         }
 
         private TypeNode TypeSpec()
@@ -229,7 +277,7 @@ namespace LearnInterpreter
             return node;
         }
 
-        public Node Parse()
+        private Node Parse()
         {
             Node node = Program();
             if (currentToken.TokenType != TokenType.Eof)
@@ -237,11 +285,12 @@ namespace LearnInterpreter
 
             return node;
         }
+        #endregion
 
         public void Evaluate()
         {
             Node ast = Parse();
-            symbolTableBuilder.Visit(ast);
+            semanticAnalyzer.Visit(ast);
             nodeVisitor.Visit(ast);
         }
     }

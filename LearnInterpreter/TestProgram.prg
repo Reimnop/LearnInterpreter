@@ -1,13 +1,16 @@
 ﻿// this is my test program
 
-decimal a; 
-decimal b;
-
-void setA() {
-	a = 8;
+void foo(decimal bar) {
+	// do stuff here
 };
 
-b = a + 2;
+decimal a = 8; 
+decimal b = 2;
 
-a = (a + b) * 2 / 5 - b * b; // some complicated shits
-b = b / 0;
+decimal c = a + b;
+decimal d = a * b / (10 + a);
+
+decimal f;
+
+f = a * b;
+f = c + f;

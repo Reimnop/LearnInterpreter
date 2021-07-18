@@ -9,6 +9,8 @@ namespace LearnInterpreter
         private char? currentChar;
 
         private int readPosition;
+        private int line = 1;
+        private int column = 1;
 
         private Dictionary<string, Token> reservedKeywords = new Dictionary<string, Token>()
         {
@@ -34,7 +36,7 @@ namespace LearnInterpreter
 
                 if (char.IsDigit((char)currentChar))
                 {
-                    return new Token(TokenType.Integer, Integer());
+                    return new Token(TokenType.Integer, Integer(), line, column);
                 }
 
                 if (char.IsLetter((char)currentChar))
@@ -48,47 +50,24 @@ namespace LearnInterpreter
                     continue;
                 }
 
-                switch (currentChar)
+                //deal with single char tokens
+                if (Enum.IsDefined(typeof(TokenType), (int)currentChar))
                 {
-                    case '{':
-                        Advance();
-                        return new Token(TokenType.OpenBracket, "{");
-                    case '}':
-                        Advance();
-                        return new Token(TokenType.CloseBracket, "}");
-                    case '=':
-                        Advance();
-                        return new Token(TokenType.Assign, "=");
-                    case ';':
-                        Advance();
-                        return new Token(TokenType.Semicolon, ";");
-                    case '+':
-                        Advance();
-                        return new Token(TokenType.Plus, "+");
-                    case '-':
-                        Advance();
-                        return new Token(TokenType.Minus, "-");
-                    case '*':
-                        Advance();
-                        return new Token(TokenType.Mult, "*");
-                    case '/':
-                        Advance();
-                        return new Token(TokenType.Div, "/");
-                    case '(':
-                        Advance();
-                        return new Token(TokenType.LeftParen, "(");
-                    case ')':
-                        Advance();
-                        return new Token(TokenType.RightParen, ")");
-                    case '.':
-                        Advance();
-                        return new Token(TokenType.Dot, ".");
+                    TokenType tokenType = (TokenType)currentChar;
+                    Token token = new Token(tokenType, currentChar.ToString(), line, column);
+                    Advance();
+                    return token;
                 }
 
-                throw new Exception("Invalid syntax!");
+                ThrowError();
             }
 
             return new Token(TokenType.Eof, string.Empty);
+        }
+
+        private void ThrowError()
+        {
+            throw new LexerError(string.Empty, null, $"On {currentChar}, line {line}, column {column}");
         }
 
         private Token Identifier()
@@ -106,7 +85,7 @@ namespace LearnInterpreter
                 return token;
             }
 
-            return new Token(TokenType.Identifier, result);
+            return new Token(TokenType.Identifier, result, line, column);
         }
 
         private char? Peek()
@@ -124,11 +103,22 @@ namespace LearnInterpreter
 
         private void Advance()
         {
+            if (currentChar == '\n')
+            {
+                line++;
+                column = 0;
+            }
+
             readPosition++;
             if (readPosition >= text.Length)
+            {
                 currentChar = null;
+            }
             else
+            {
                 currentChar = text[readPosition];
+                column++;
+            }
         }
 
         private void SkipWhitespace()
