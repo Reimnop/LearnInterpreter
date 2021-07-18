@@ -64,5 +64,27 @@ namespace LearnInterpreter
 
             return _enclosingScope != null ? _enclosingScope.Lookup(name) : throw new Exception($"The name \"{name}\" does not exist in the current context!");
         }
+
+        public override string ToString()
+        {
+            const int align = 10;
+
+            string s = 
+                $"SCOPED SYMBOL TABLE{Environment.NewLine}" +
+                $"Name: {_scopeName}{Environment.NewLine}" +
+                $"Level: {_scopeLevel}{Environment.NewLine}" +
+                $"================================{Environment.NewLine}";
+            foreach (Symbol symbol in symbols.Values)
+            {
+                s += symbol.Name;
+                for (int i = 0; i < align - symbol.Name.Length; i++)
+                {
+                    s += " ";
+                }
+                s += $" : {(symbol.Type != null ? symbol.Type.Name : "None")}{Environment.NewLine}";
+            }
+
+            return s;
+        }
     }
 }

@@ -5,8 +5,10 @@ namespace LearnInterpreter
 {
     public class Lexer
     {
+        public char? CurrentChar => _currentChar;
+
         private string text;
-        private char? currentChar;
+        private char? _currentChar;
 
         private int readPosition;
         private int line = 1;
@@ -21,40 +23,40 @@ namespace LearnInterpreter
         public Lexer(string text)
         {
             this.text = text;
-            currentChar = text[readPosition];
+            _currentChar = text[readPosition];
         }
 
         public Token NextToken()
         {
-            while (currentChar != null) //if isn't EOF
+            while (_currentChar != null) //if isn't EOF
             {
-                if (char.IsWhiteSpace((char)currentChar) || currentChar == '\r' || currentChar == '\n')
+                if (char.IsWhiteSpace((char)_currentChar) || _currentChar == '\r' || _currentChar == '\n')
                 {
                     SkipWhitespace();
                     continue;
                 }
 
-                if (char.IsDigit((char)currentChar))
+                if (char.IsDigit((char)_currentChar))
                 {
                     return new Token(TokenType.Integer, Integer(), line, column);
                 }
 
-                if (char.IsLetter((char)currentChar))
+                if (char.IsLetter((char)_currentChar))
                 {
                     return Identifier();
                 }
 
-                if (currentChar == '/' && Peek() == '/') // comment handling
+                if (_currentChar == '/' && Peek() == '/') // comment handling
                 {
                     SkipComment();
                     continue;
                 }
 
                 //deal with single char tokens
-                if (Enum.IsDefined(typeof(TokenType), (int)currentChar))
+                if (Enum.IsDefined(typeof(TokenType), (int)_currentChar))
                 {
-                    TokenType tokenType = (TokenType)currentChar;
-                    Token token = new Token(tokenType, currentChar.ToString(), line, column);
+                    TokenType tokenType = (TokenType)_currentChar;
+                    Token token = new Token(tokenType, _currentChar.ToString(), line, column);
                     Advance();
                     return token;
                 }
@@ -67,16 +69,16 @@ namespace LearnInterpreter
 
         private void ThrowError()
         {
-            throw new LexerError(string.Empty, null, $"On {currentChar}, line {line}, column {column}");
+            throw new LexerError(string.Empty, null, $"On {_currentChar}, line {line}, column {column}");
         }
 
         private Token Identifier()
         {
             string result = string.Empty;
 
-            while (currentChar != null && char.IsLetterOrDigit((char)currentChar))
+            while (_currentChar != null && char.IsLetterOrDigit((char)_currentChar))
             {
-                result += currentChar;
+                result += _currentChar;
                 Advance();
             }
 
@@ -103,7 +105,7 @@ namespace LearnInterpreter
 
         private void Advance()
         {
-            if (currentChar == '\n')
+            if (_currentChar == '\n')
             {
                 line++;
                 column = 0;
@@ -112,18 +114,18 @@ namespace LearnInterpreter
             readPosition++;
             if (readPosition >= text.Length)
             {
-                currentChar = null;
+                _currentChar = null;
             }
             else
             {
-                currentChar = text[readPosition];
+                _currentChar = text[readPosition];
                 column++;
             }
         }
 
         private void SkipWhitespace()
         {
-            while (currentChar != null && (char.IsWhiteSpace((char)currentChar) || currentChar == '\r' || currentChar == '\n'))
+            while (_currentChar != null && (char.IsWhiteSpace((char)_currentChar) || _currentChar == '\r' || _currentChar == '\n'))
             {
                 Advance();
             }
@@ -131,7 +133,7 @@ namespace LearnInterpreter
 
         private void SkipComment()
         {
-            while (currentChar != '\r' && currentChar != '\n')
+            while (_currentChar != '\r' && _currentChar != '\n')
             {
                 Advance();
             }
@@ -140,9 +142,9 @@ namespace LearnInterpreter
         private string Integer()
         {
             string str = string.Empty;
-            while (currentChar != null && char.IsDigit((char)currentChar))
+            while (_currentChar != null && char.IsDigit((char)_currentChar))
             {
-                str += currentChar;
+                str += _currentChar;
                 Advance();
             }
 

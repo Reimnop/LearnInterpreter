@@ -19,8 +19,9 @@ namespace LearnInterpreter
 
             currentScope = new ScopedSymbolTable("global", 1);
             Visit(program.Node);
-
+            
             Console.WriteLine("Leaving scope: global");
+            Console.WriteLine(currentScope);
 
             return null;
         }
@@ -149,9 +150,38 @@ namespace LearnInterpreter
             }
 
             Visit(declaration.Block);
-
+            
             Console.WriteLine($"Leaving scope: {methodName}");
+            Console.WriteLine(currentScope);
             currentScope = currentScope.EnclosingScope;
+
+            return null;
+        }
+
+        protected override object VisitMethodCall(Node node)
+        {
+            MethodCall call = (MethodCall)node;
+
+            //checks
+            MethodSymbol methodSymbol = null;
+            if (!currentScope.TryLookup(call.MethodName, out Symbol symbol))
+            {
+                ThrowError(ErrorCodes.IdentifierNotFound, call.Token);
+            }
+            else
+            {
+                methodSymbol = (MethodSymbol)symbol;
+            }
+
+            if (call.Parameters.Count != methodSymbol.Parameters.Count)
+            {
+                ThrowError(ErrorCodes.ParamCountMismatch, call.Token);
+            }
+
+            foreach (Node param in call.Parameters)
+            {
+                Visit(param);
+            }
 
             return null;
         }

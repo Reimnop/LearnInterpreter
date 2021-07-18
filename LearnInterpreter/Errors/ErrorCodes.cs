@@ -8,6 +8,7 @@
         public const string
             UnexpectedToken = "Unexpected token",
             IdentifierNotFound = "Identifier not found",
-            DuplicateIdentifier = "Duplicate identifier";
+            DuplicateIdentifier = "Duplicate identifier",
+            ParamCountMismatch = "Incorrect parameter count";
     }
 }

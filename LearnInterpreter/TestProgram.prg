@@ -14,3 +14,5 @@ decimal f;
 
 f = a * b;
 f = c + f;
+
+foo(a);

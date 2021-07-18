@@ -1,297 +1,160 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace LearnInterpreter
 {
-    /*
-        Refer to MyScript.gram for grammar 
-    */
-
-    public class Interpreter
+    public class Interpreter : NodeVisitor
     {
-        private Lexer lexer;
-        private Token currentToken;
-
-        private NodeVisitor nodeVisitor;
+        private Parser parser;
         private SemanticAnalyzer semanticAnalyzer;
+
+        private CallStack callStack = new CallStack();
 
         public Interpreter(Lexer lexer)
         {
-            this.lexer = lexer;
-            currentToken = lexer.NextToken();
-
-            nodeVisitor = new NodeVisitor();
+            parser = new Parser(lexer);
             semanticAnalyzer = new SemanticAnalyzer();
         }
 
-        #region Parser
-        private void Eat(TokenType tokenType)
+        protected override object VisitProgram(Node node)
         {
-            if (tokenType == currentToken.TokenType)
-            {
-                currentToken = lexer.NextToken();
-            }
-            else
-            {
-                ThrowError(ErrorCodes.UnexpectedToken, currentToken);
-            }
+            ProgramNode program = (ProgramNode)node;
+
+            callStack.Push(new ActivationRecord("Program", ARType.Program, 1));
+            Visit(program.Node);
+
+            Console.WriteLine(callStack);
+            callStack.Pop();
+            return null;
         }
 
-        private void ThrowError(string errorCode, Token token)
+        protected override object VisitBinOp(Node node)
         {
-            throw new ParserError(errorCode, token, $"{errorCode} -> {token}");
-        }
+            BinOp op = (BinOp)node;
 
-        private Node Program()
-        {
-            if (currentToken.TokenType == TokenType.OpenBracket)
+            float left = (float)Visit(op.Left);
+            float right = (float)Visit(op.Right);
+
+            switch (op.Token.TokenType)
             {
-                return new ProgramNode(Block());
-            }
-            else
-            {
-                return new ProgramNode(StatementList());
-            }
-        }
-
-        private Block Block()
-        {
-            Eat(TokenType.OpenBracket);
-            Statements statements = StatementList();
-            Eat(TokenType.CloseBracket);
-
-            return new Block(statements);
-        }
-
-        private Statements StatementList()
-        {
-            Node node = Statement();
-
-            List<Node> nodes = new List<Node>() { node };
-
-            while (currentToken.TokenType == TokenType.Semicolon)
-            {
-                Eat(TokenType.Semicolon);
-                nodes.Add(Statement());
+                case TokenType.Plus:
+                    return left + right;
+                case TokenType.Minus:
+                    return left - right;
+                case TokenType.Mult:
+                    return left * right;
+                case TokenType.Div:
+                    return left / right;
             }
 
-            return new Statements(nodes);
+            throw new Exception();
         }
 
-        private Node Statement()
+        protected override object VisitUnaryOp(Node node)
         {
-            switch (currentToken.TokenType)
-            {
-                case TokenType.OpenBracket:
-                    return Block();
-                case TokenType.Identifier:
-                    return AssignmentStatement();
-                case TokenType.Type:
-                    return VariableDeclarationStatement();
-                case TokenType.Void:
-                    return MethodDeclarationStatement();
-                default:
-                    return new NoOp();
-            }
-        }
+            UnaryOp op = (UnaryOp)node;
 
-        private VariableDeclaration VariableDeclarationStatement()
-        {
-            TypeNode type = TypeSpec();
-            Variable var = Variable();
-
-            Node assignment = null;
-            if (currentToken.TokenType == TokenType.Assign)
+            switch (op.Token.TokenType)
             {
-                Eat(TokenType.Assign);
-                assignment = Expr();
+                case TokenType.Plus:
+                    return (float)Visit(op.Expr);
+                case TokenType.Minus:
+                    return -(float)Visit(op.Expr);
             }
 
-            return new VariableDeclaration(type, var, assignment);
+            throw new Exception();
         }
 
-        private MethodDeclaration MethodDeclarationStatement()
+        protected override object VisitNumber(Node node)
         {
-            Eat(TokenType.Void);
-
-            Token token = currentToken;
-            Eat(TokenType.Identifier);
-
-            Eat(TokenType.LeftParen);
-
-            Parameters parameters = null;
-            if (currentToken.TokenType == TokenType.RightParen)
-            {
-                Eat(TokenType.RightParen);
-            }
-            else
-            {
-                parameters = ParameterList();
-                Eat(TokenType.RightParen);
-            }
-
-            Block block = Block();
-
-            return new MethodDeclaration(token.Value, parameters, block);
+            Number num = (Number)node;
+            return float.Parse(num.Value);
         }
 
-        private Parameters ParameterList()
+        protected override object VisitBlock(Node node)
         {
-            List<Parameter> parameters = new List<Parameter>() { Parameter() };
+            Block block = (Block)node;
+            return VisitStatements(block.Statements);
+        }
 
-            while (currentToken.TokenType == TokenType.Comma)
+        protected override object VisitStatements(Node node)
+        {
+            Statements statements = (Statements)node;
+
+            foreach (Node child in statements.Children)
             {
-                Eat(TokenType.Comma);
-                parameters.Add(Parameter());
+                Visit(child);
             }
 
-            return new Parameters(parameters);
+            return null;
         }
 
-        private Parameter Parameter()
+        protected override object VisitAssign(Node node)
         {
-            TypeNode type = TypeSpec();
-            Variable var = Variable();
+            Assign assign = (Assign)node;
+            Variable var = assign.Left;
 
-            return new Parameter(type, var);
+            ActivationRecord ar = callStack.Peek();
+            ar[var.Token.Value] = Visit(assign.Right);
+
+            return null;
         }
 
-        private TypeNode TypeSpec()
+        protected override object VisitVariableDeclaration(Node node)
         {
-            Token type = currentToken;
-            Eat(TokenType.Type);
+            VariableDeclaration declaration = (VariableDeclaration)node;
+            Variable variable = declaration.Variable;
 
-            return new TypeNode(type);
-        }
-
-        private Node AssignmentStatement()
-        {
-            Variable left = Variable();
-            Token op = currentToken;
-            Eat(TokenType.Assign);
-            Node right = Expr();
-
-            return new Assign(op, left, right);
-        }
-
-        private Variable Variable()
-        {
-            Variable var = new Variable(currentToken);
-            Eat(TokenType.Identifier);
-
-            return var;
-        }
-
-        private Node Factor()
-        {
-            Token token = currentToken;
-
-            if (currentToken.TokenType == TokenType.LeftParen)
+            object assign = 0f;
+            if (declaration.Assignment != null)
             {
-                Eat(TokenType.LeftParen);
-                Node node = Expr();
-                Eat(TokenType.RightParen);
-
-                return node;
+                assign = Visit(declaration.Assignment);
             }
 
-            if (currentToken.TokenType == TokenType.Integer)
-            {
-                Node node = Number();
-                return node;
-            }
+            ActivationRecord ar = callStack.Peek();
+            ar[variable.Token.Value] = assign;
 
-            if (currentToken.TokenType == TokenType.Plus || currentToken.TokenType == TokenType.Minus)
-            {
-                Eat(currentToken.TokenType);
-                return new UnaryOp(token, Factor());
-            }
-
-            Node var = Variable();
-            return var;
+            return null;
         }
 
-        private Node Number()
+        protected override object VisitMethodDeclaration(Node node)
         {
-            Token token = currentToken;
-            Eat(TokenType.Integer);
+            return null;
+        }
 
-            string num = token.Value;
+        protected override object VisitMethodCall(Node node)
+        {
+            return null;
+        }
 
-            if (currentToken.TokenType == TokenType.Dot)
+        protected override object VisitTypeNode(Node node)
+        {
+            TypeNode type = (TypeNode)node;
+            return type.Token.Value;
+        }
+
+        protected override object VisitVariable(Node node)
+        {
+            Variable variable = (Variable)node;
+
+            ActivationRecord ar = callStack.Peek();
+            if (ar.TryGet(variable.Token.Value, out object val))
             {
-                Eat(TokenType.Dot);
-
-                Token dec = currentToken;
-                Eat(TokenType.Integer);
-
-                num += $".{dec.Value}";
+                return val;
             }
 
-            return new Number(num);
+            return null;
         }
 
-        private Node Term()
+        protected override object VisitNoOp(Node node)
         {
-            Node node = Factor();
-
-            while (currentToken.TokenType == TokenType.Mult || currentToken.TokenType == TokenType.Div)
-            {
-                Token token = currentToken;
-                if (token.TokenType == TokenType.Mult)
-                {
-                    Eat(TokenType.Mult);
-                }
-
-                if (token.TokenType == TokenType.Div)
-                {
-                    Eat(TokenType.Div);
-                }
-
-                node = new BinOp(token, node, Factor());
-            }
-
-            return node;
+            return null;
         }
-
-        private Node Expr()
-        {
-            Node node = Term();
-
-            while (currentToken.TokenType == TokenType.Plus || currentToken.TokenType == TokenType.Minus)
-            {
-                Token token = currentToken;
-                if (token.TokenType == TokenType.Plus)
-                {
-                    Eat(TokenType.Plus);
-                }
-
-                if (token.TokenType == TokenType.Minus)
-                {
-                    Eat(TokenType.Minus);
-                }
-
-                node = new BinOp(token, node, Term());
-            }
-
-            return node;
-        }
-
-        private Node Parse()
-        {
-            Node node = Program();
-            if (currentToken.TokenType != TokenType.Eof)
-                throw new Exception("Eof expected!");
-
-            return node;
-        }
-        #endregion
 
         public void Evaluate()
         {
-            Node ast = Parse();
+            ProgramNode ast = parser.Parse();
             semanticAnalyzer.Visit(ast);
-            nodeVisitor.Visit(ast);
+            Visit(ast);
         }
     }
 }

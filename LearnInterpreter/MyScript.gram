@@ -1,7 +1,8 @@
 Program              : StatementList | Block
 Block                : OpenBracket StatementList CloseBracket
 StatementList        : Statement | Statement Semicolon StatementList
-Statement            : Block | Method | AssignmentStatement | DeclarationStatement | Empty
+Statement            : Block | Method | MethodCall | AssignmentStatement | DeclarationStatement | Empty
+MethodCall           : Identifier LeftParen (Expr (Comma Expr)*)? RightParen
 Method               : void Identifier LeftParen (ParameterList)? RightParen Block
 ParameterList        : Parameter | Parameter Comma ParameterList
 Parameter            : Type Identifier
