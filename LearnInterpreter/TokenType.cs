@@ -24,6 +24,7 @@
         If           = 5,
         True         = 6,
         False        = 7,
-        Equal        = 8
+        Equal        = 8,
+        String       = 9
     }
 }

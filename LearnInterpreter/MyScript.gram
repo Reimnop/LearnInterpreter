@@ -14,10 +14,6 @@ AssignmentStatement  : Variable Assign Expr
 Empty                : 
 Expr                 : Term ((Plus | Minus) Term)*
 Term                 : Factor ((Mult | Div) Factor)*
-Factor               : Plus Factor
-                     | Minus Factor
-                     | Number
-                     | LeftParen Expr RightParen
-                     | Variable
+Factor               : String | Plus Factor | Minus Factor | Number | LeftParen Expr RightParen | Variable
 Number               : Integer | Integer Dot Integer
 Variable             : Identifier
