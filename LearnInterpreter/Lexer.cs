@@ -62,6 +62,8 @@ namespace LearnInterpreter
 
                 if (_currentChar == '=' && Peek() == '=')
                 {
+                    Advance();
+                    Advance();
                     return new Token(TokenType.Equal, "==", line, column);
                 }
 
