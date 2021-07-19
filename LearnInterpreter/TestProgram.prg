@@ -1,21 +1,17 @@
 ﻿// this is my test program
 
-var a = 1;
-var b = 1;
+var last = 1;
 
-println("Fibonacci:");
+println("Factorial:");
 
-void foo() {
-	var c = a + b;
+void factorial(var i) {
+	last = last * i;
 
-	b = a;
-	a = c;
+	print(last, ", ");
 
-	println(c);
-
-	if (c < 255) {
-		foo();
+	if (i < 20) {
+		factorial(i + 1);
 	};
 };
 
-foo();
+factorial(1);

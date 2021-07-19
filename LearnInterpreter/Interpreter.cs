@@ -148,7 +148,7 @@ namespace LearnInterpreter
 
                 for (int i = 0; i < call.Parameters.Count; i++)
                 {
-                    ar[methodSymbol.Parameters[i].Name] = Visit(call.Parameters[i]);
+                    ar.Define(methodSymbol.Parameters[i].Name, Visit(call.Parameters[i]));
                 }
                 callStack.Push(ar);
                 Visit(methodSymbol.Body);
