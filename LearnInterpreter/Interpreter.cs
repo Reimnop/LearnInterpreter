@@ -119,13 +119,16 @@ namespace LearnInterpreter
             }
 
             ActivationRecord ar = callStack.Peek();
-            ar[variable.Token.Value] = assign;
+            ar.Define(variable.Token.Value, assign);
 
             return null;
         }
 
         protected override object VisitMethodDeclaration(Node node)
         {
+            MethodDeclaration declaration = (MethodDeclaration)node;
+            declaration.Symbol.SymbolRecord = callStack.Peek();
+
             return null;
         }
 
@@ -141,6 +144,8 @@ namespace LearnInterpreter
                 MethodSymbol methodSymbol = (MethodSymbol)symbol;
 
                 ActivationRecord ar = new ActivationRecord(ARType.Method, symbol.ScopeLevel + 1);
+                ar.EnclosingRecord = methodSymbol.SymbolRecord;
+
                 for (int i = 0; i < call.Parameters.Count; i++)
                 {
                     ar[methodSymbol.Parameters[i].Name] = Visit(call.Parameters[i]);
@@ -149,7 +154,7 @@ namespace LearnInterpreter
                 Visit(methodSymbol.Body);
 
 #if PRINT_DEBUG
-            Console.WriteLine(callStack);
+                Console.WriteLine(callStack);
 #endif
                 callStack.Pop();
             }
@@ -176,6 +181,7 @@ namespace LearnInterpreter
             if ((bool)Visit(ifNode.Boolean))
             {
                 ActivationRecord ar = new ActivationRecord(ARType.If, ifNode.ScopeLevel + 1);
+                ar.EnclosingRecord = callStack.Peek();
 
                 callStack.Push(ar);
                 Visit(ifNode.Body);

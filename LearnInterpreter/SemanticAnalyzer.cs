@@ -127,19 +127,23 @@
             MethodSymbol methodSymbol = new MethodSymbol(methodName, declaration.Block);
 
             currentScope.Define(methodSymbol);
+            declaration.Symbol = methodSymbol;
 #if PRINT_DEBUG
             Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
 #endif
             currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
 
-            foreach (Parameter param in declaration.Parameters.Children)
+            if (declaration.Parameters != null)
             {
-                string paramName = param.Variable.Token.Value;
+                foreach (Parameter param in declaration.Parameters.Children)
+                {
+                    string paramName = param.Variable.Token.Value;
 
-                VariableSymbol variableSymbol = new VariableSymbol(paramName);
-                currentScope.Define(variableSymbol);
+                    VariableSymbol variableSymbol = new VariableSymbol(paramName);
+                    currentScope.Define(variableSymbol);
 
-                methodSymbol.Parameters.Add(variableSymbol);
+                    methodSymbol.Parameters.Add(variableSymbol);
+                }
             }
 
             Visit(declaration.Block);
@@ -171,6 +175,7 @@
             }
 
             MethodSymbol methodSymbol = (MethodSymbol)symbol;
+
             if (call.Parameters.Count != methodSymbol.Parameters.Count)
             {
                 ThrowError(ErrorCodes.ParamCountMismatch, call.Token);

@@ -6,6 +6,7 @@ namespace LearnInterpreter
     {
         public Block Body;
         public List<VariableSymbol> Parameters;
+        public ActivationRecord SymbolRecord;
 
         public MethodSymbol(string name, Block body, List<VariableSymbol> parameters = null) : base(name)
         {

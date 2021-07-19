@@ -17,7 +17,7 @@ namespace LearnInterpreter
         public MethodCall(string methodName, List<Node> parameters, Token token)
         {
             _methodName = methodName;
-            _parameters = parameters;
+            _parameters = parameters ?? new List<Node>();
             _token = token;
         }
     }

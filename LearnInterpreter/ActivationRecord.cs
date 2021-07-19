@@ -7,6 +7,7 @@ namespace LearnInterpreter
     {
         public ARType Type => _type;
         public int NestingLevel => _nestingLevel;
+        public ActivationRecord EnclosingRecord;
 
         private ARType _type;
         private int _nestingLevel;
@@ -23,17 +24,45 @@ namespace LearnInterpreter
         {
             get
             {
-                return members[key];
+                if (TryGet(key, out object val))
+                {
+                    return val;
+                }
+
+                return EnclosingRecord != null ? EnclosingRecord[key] : throw new KeyNotFoundException();
             }
             set
             {
+                if (!members.ContainsKey(key))
+                {
+                    if (EnclosingRecord != null)
+                    {
+                        EnclosingRecord[key] = value;
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException();
+                    }
+                    return;
+                }
+
                 members[key] = value;
             }
         }
 
+        public void Define(string key, object value)
+        {
+            members.Add(key, value);
+        }
+
         public bool TryGet(string key, out object value)
         {
-            return members.TryGetValue(key, out value);
+            if (members.TryGetValue(key, out value))
+            {
+                return true;
+            }
+
+            return EnclosingRecord != null ? EnclosingRecord.TryGet(key, out value) : false;
         }
 
         public override string ToString()
