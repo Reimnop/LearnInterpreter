@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LearnInterpreter
 {
@@ -15,7 +16,7 @@ namespace LearnInterpreter
             semanticAnalyzer = new SemanticAnalyzer();
         }
 
-        protected override object VisitProgram(Node node)
+        protected override dynamic VisitProgram(Node node)
         {
             ProgramNode program = (ProgramNode)node;
 
@@ -29,12 +30,12 @@ namespace LearnInterpreter
             return null;
         }
 
-        protected override object VisitBinOp(Node node)
+        protected override dynamic VisitBinOp(Node node)
         {
             BinOp op = (BinOp)node;
 
-            float left = (float)Visit(op.Left);
-            float right = (float)Visit(op.Right);
+            dynamic left = Visit(op.Left);
+            dynamic right = Visit(op.Right);
 
             switch (op.Token.TokenType)
             {
@@ -51,40 +52,53 @@ namespace LearnInterpreter
             throw new Exception();
         }
 
-        protected override object VisitUnaryOp(Node node)
+        protected override dynamic VisitUnaryOp(Node node)
         {
             UnaryOp op = (UnaryOp)node;
 
             switch (op.Token.TokenType)
             {
                 case TokenType.Plus:
-                    return (float)Visit(op.Expr);
+                    return +Visit(op.Expr);
                 case TokenType.Minus:
-                    return -(float)Visit(op.Expr);
+                    return -Visit(op.Expr);
             }
 
             throw new Exception();
         }
 
-        protected override object VisitNumber(Node node)
+        protected override dynamic VisitNumber(Node node)
         {
             Number num = (Number)node;
             return float.Parse(num.Value);
         }
 
-        protected override object VisitString(Node node)
+        protected override dynamic VisitString(Node node)
         {
             StringNode stringNode = (StringNode)node;
             return stringNode.Value;
         }
 
-        protected override object VisitBlock(Node node)
+        protected override dynamic VisitArrayNode(Node node)
+        {
+            ArrayNode array = (ArrayNode)node;
+
+            List<dynamic> elements = new List<dynamic>();
+            foreach (Node element in array.Elements)
+            {
+                elements.Add(element);
+            }
+
+            return elements;
+        }
+
+        protected override dynamic VisitBlock(Node node)
         {
             Block block = (Block)node;
             return VisitStatements(block.Statements);
         }
 
-        protected override object VisitStatements(Node node)
+        protected override dynamic VisitStatements(Node node)
         {
             Statements statements = (Statements)node;
 
@@ -96,35 +110,44 @@ namespace LearnInterpreter
             return null;
         }
 
-        protected override object VisitAssign(Node node)
+        protected override dynamic VisitAssign(Node node)
         {
             Assign assign = (Assign)node;
             Variable var = assign.Left;
 
             ActivationRecord ar = callStack.Peek();
-            ar[var.Token.Value] = Visit(assign.Right);
+
+            if (var.IndexNode == null)
+            {
+                ar[var.Token.Value] = Visit(assign.Right);
+            }
+            else
+            {
+                int index = Visit(var.IndexNode);
+                ar[var.Token.Value][index] = Visit(assign.Right);
+            }
 
             return null;
         }
 
-        protected override object VisitVariableDeclaration(Node node)
+        protected override dynamic VisitVariableDeclaration(Node node)
         {
             VariableDeclaration declaration = (VariableDeclaration)node;
-            Variable variable = declaration.Variable;
+            Token token = declaration.Token;
 
-            object assign = 0f;
+            dynamic assign = null;
             if (declaration.Assignment != null)
             {
                 assign = Visit(declaration.Assignment);
             }
 
             ActivationRecord ar = callStack.Peek();
-            ar.Define(variable.Token.Value, assign);
+            ar.Define(token.Value, assign);
 
             return null;
         }
 
-        protected override object VisitMethodDeclaration(Node node)
+        protected override dynamic VisitMethodDeclaration(Node node)
         {
             MethodDeclaration declaration = (MethodDeclaration)node;
             declaration.Symbol.SymbolRecord = callStack.Peek();
@@ -132,7 +155,7 @@ namespace LearnInterpreter
             return null;
         }
 
-        protected override object VisitMethodCall(Node node)
+        protected override dynamic VisitMethodCall(Node node)
         {
             MethodCall call = (MethodCall)node;
             string methodName = call.MethodName;
@@ -174,7 +197,7 @@ namespace LearnInterpreter
             return null;
         }
 
-        protected override object VisitIfNode(Node node)
+        protected override dynamic VisitIfNode(Node node)
         {
             IfNode ifNode = (IfNode)node;
 
@@ -195,7 +218,7 @@ namespace LearnInterpreter
             return null;
         }
 
-        protected override object VisitBooleanNode(Node node)
+        protected override dynamic VisitBooleanNode(Node node)
         {
             BooleanNode boolean = (BooleanNode)node;
 
@@ -212,7 +235,7 @@ namespace LearnInterpreter
             return Visit(boolean.ConditionNode);
         }
 
-        protected override object VisitConditionNode(Node node)
+        protected override dynamic VisitConditionNode(Node node)
         {
             ConditionNode condition = (ConditionNode)node;
 
@@ -222,28 +245,35 @@ namespace LearnInterpreter
             switch (condition.Op.TokenType)
             {
                 case TokenType.GreaterThan:
-                    return (float)Visit(left) > (float)Visit(right);
+                    return Visit(left) > Visit(right);
                 case TokenType.LessThan:
-                    return (float)Visit(left) < (float)Visit(right);
+                    return Visit(left) < Visit(right);
                 default:
-                    return (float)Visit(left) == (float)Visit(right);
+                    return Visit(left) == Visit(right);
             }
         }
 
-        protected override object VisitVariable(Node node)
+        protected override dynamic VisitVariable(Node node)
         {
             Variable variable = (Variable)node;
 
             ActivationRecord ar = callStack.Peek();
-            if (ar.TryGet(variable.Token.Value, out object val))
+            if (ar.TryGet(variable.Token.Value, out dynamic val))
             {
-                return val;
+                if (variable.IndexNode == null)
+                {
+                    return val;
+                }
+                else
+                {
+                    return val[(int)Visit(variable.IndexNode)];
+                }
             }
 
             return null;
         }
 
-        protected override object VisitNoOp(Node node)
+        protected override dynamic VisitNoOp(Node node)
         {
             return null;
         }

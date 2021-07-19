@@ -9,31 +9,31 @@
             throw new SemanticError(errorCode, token, $"{errorCode} -> {token}");
         }
 
-        protected override object VisitProgram(Node node)
+        protected override dynamic VisitProgram(Node node)
         {
             ProgramNode program = (ProgramNode)node;
 
 #if PRINT_DEBUG
-            Console.WriteLine("Entering scope: 1");
+            System.Console.WriteLine("Entering scope: 1");
 #endif
             currentScope = new ScopedSymbolTable(1);
             Visit(program.Node);
 #if PRINT_DEBUG
-            Console.WriteLine("Leaving scope: 1");
-            Console.WriteLine(currentScope);
+            System.Console.WriteLine("Leaving scope: 1");
+            System.Console.WriteLine(currentScope);
 #endif
 
             return null;
         }
 
-        protected override object VisitBlock(Node node)
+        protected override dynamic VisitBlock(Node node)
         {
             Block block = (Block)node;
             Visit(block.Statements);
             return null;
         }
 
-        protected override object VisitAssign(Node node)
+        protected override dynamic VisitAssign(Node node)
         {
             Assign assign = (Assign)node;
 
@@ -48,7 +48,7 @@
             return null;
         }
 
-        protected override object VisitVariable(Node node)
+        protected override dynamic VisitVariable(Node node)
         {
             Variable variable = (Variable)node;
 
@@ -61,7 +61,7 @@
             return null;
         }
 
-        protected override object VisitBinOp(Node node)
+        protected override dynamic VisitBinOp(Node node)
         {
             BinOp op = (BinOp)node;
 
@@ -71,22 +71,27 @@
             return null;
         }
 
-        protected override object VisitNumber(Node node)
+        protected override dynamic VisitNumber(Node node)
         {
             return null;
         }
 
-        protected override object VisitString(Node node)
+        protected override dynamic VisitString(Node node)
         {
             return null;
         }
 
-        protected override object VisitNoOp(Node node)
+        protected override dynamic VisitArrayNode(Node node)
         {
             return null;
         }
 
-        protected override object VisitStatements(Node node)
+        protected override dynamic VisitNoOp(Node node)
+        {
+            return null;
+        }
+
+        protected override dynamic VisitStatements(Node node)
         {
             Statements statements = (Statements)node;
 
@@ -98,28 +103,28 @@
             return null;
         }
 
-        protected override object VisitUnaryOp(Node node)
+        protected override dynamic VisitUnaryOp(Node node)
         {
             UnaryOp op = (UnaryOp)node;
             Visit(op.Expr);
             return null;
         }
 
-        protected override object VisitVariableDeclaration(Node node)
+        protected override dynamic VisitVariableDeclaration(Node node)
         {
             VariableDeclaration declaration = (VariableDeclaration)node;
-            string varName = declaration.Variable.Token.Value;
+            string varName = declaration.Token.Value;
 
             if (currentScope.TryLookup(varName, out _, true))
             {
-                ThrowError(ErrorCodes.DuplicateIdentifier, declaration.Variable.Token);
+                ThrowError(ErrorCodes.DuplicateIdentifier, declaration.Token);
             }
 
             currentScope.Define(new VariableSymbol(varName));
             return null;
         }
 
-        protected override object VisitMethodDeclaration(Node node)
+        protected override dynamic VisitMethodDeclaration(Node node)
         {
             MethodDeclaration declaration = (MethodDeclaration)node;
 
@@ -129,7 +134,7 @@
             currentScope.Define(methodSymbol);
             declaration.Symbol = methodSymbol;
 #if PRINT_DEBUG
-            Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
+            System.Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
 #endif
             currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
 
@@ -149,15 +154,15 @@
             Visit(declaration.Block);
 
 #if PRINT_DEBUG
-            Console.WriteLine($"Leaving scope: {currentScope.ScopeLevel}");
-            Console.WriteLine(currentScope);
+            System.Console.WriteLine($"Leaving scope: {currentScope.ScopeLevel}");
+            System.Console.WriteLine(currentScope);
 #endif
             currentScope = currentScope.EnclosingScope;
 
             return null;
         }
 
-        protected override object VisitMethodCall(Node node)
+        protected override dynamic VisitMethodCall(Node node)
         {
             MethodCall call = (MethodCall)node;
 
@@ -191,7 +196,7 @@
             return null;
         }
 
-        protected override object VisitIfNode(Node node)
+        protected override dynamic VisitIfNode(Node node)
         {
             IfNode ifNode = (IfNode)node;
 
@@ -200,26 +205,26 @@
             Visit(ifNode.Boolean);
 
 #if PRINT_DEBUG
-            Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
+            System.Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
 #endif
             currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
             Visit(ifNode.Body);
 
 #if PRINT_DEBUG
-            Console.WriteLine($"Leaving scope {currentScope.ScopeLevel}");
-            Console.WriteLine(currentScope);
+            System.Console.WriteLine($"Leaving scope {currentScope.ScopeLevel}");
+            System.Console.WriteLine(currentScope);
 #endif
             currentScope = currentScope.EnclosingScope;
 
             return null;
         }
 
-        protected override object VisitBooleanNode(Node node)
+        protected override dynamic VisitBooleanNode(Node node)
         {
             return null;
         }
 
-        protected override object VisitConditionNode(Node node)
+        protected override dynamic VisitConditionNode(Node node)
         {
             return null;
         }

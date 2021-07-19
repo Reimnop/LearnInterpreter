@@ -12,7 +12,7 @@ namespace LearnInterpreter
         private ARType _type;
         private int _nestingLevel;
 
-        private Dictionary<string, object> members = new Dictionary<string, object>();
+        private Dictionary<string, dynamic> members = new Dictionary<string, dynamic>();
 
         public ActivationRecord(ARType type, int nestingLevel)
         {
@@ -20,7 +20,7 @@ namespace LearnInterpreter
             _nestingLevel = nestingLevel;
         }
 
-        public object this[string key]
+        public dynamic this[string key]
         {
             get
             {

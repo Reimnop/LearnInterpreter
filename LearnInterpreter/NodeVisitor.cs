@@ -5,7 +5,7 @@ namespace LearnInterpreter
 {
     public abstract class NodeVisitor
     {
-        private delegate object Visitor(Node node);
+        private delegate dynamic Visitor(Node node);
         private Dictionary<Type, Visitor> visitors;
 
         public NodeVisitor()
@@ -17,6 +17,7 @@ namespace LearnInterpreter
                 { typeof(UnaryOp), VisitUnaryOp },
                 { typeof(Number), VisitNumber },
                 { typeof(StringNode), VisitString },
+                { typeof(ArrayNode), VisitArrayNode },
                 { typeof(Block), VisitBlock },
                 { typeof(Statements), VisitStatements },
                 { typeof(Assign), VisitAssign },
@@ -31,26 +32,27 @@ namespace LearnInterpreter
             };
         }
 
-        public object Visit(Node node)
+        public dynamic Visit(Node node)
         {
             return visitors[node.GetType()].Invoke(node);
         }
 
-        protected abstract object VisitProgram(Node node);
-        protected abstract object VisitBinOp(Node node);
-        protected abstract object VisitUnaryOp(Node node);
-        protected abstract object VisitNumber(Node node);
-        protected abstract object VisitString(Node node);
-        protected abstract object VisitBlock(Node node);
-        protected abstract object VisitStatements(Node node);
-        protected abstract object VisitAssign(Node node);
-        protected abstract object VisitVariableDeclaration(Node node);
-        protected abstract object VisitMethodDeclaration(Node node);
-        protected abstract object VisitMethodCall(Node node);
-        protected abstract object VisitIfNode(Node node);
-        protected abstract object VisitBooleanNode(Node node);
-        protected abstract object VisitConditionNode(Node node);
-        protected abstract object VisitVariable(Node node);
-        protected abstract object VisitNoOp(Node node);
+        protected abstract dynamic VisitProgram(Node node);
+        protected abstract dynamic VisitBinOp(Node node);
+        protected abstract dynamic VisitUnaryOp(Node node);
+        protected abstract dynamic VisitNumber(Node node);
+        protected abstract dynamic VisitString(Node node);
+        protected abstract dynamic VisitArrayNode(Node node);
+        protected abstract dynamic VisitBlock(Node node);
+        protected abstract dynamic VisitStatements(Node node);
+        protected abstract dynamic VisitAssign(Node node);
+        protected abstract dynamic VisitVariableDeclaration(Node node);
+        protected abstract dynamic VisitMethodDeclaration(Node node);
+        protected abstract dynamic VisitMethodCall(Node node);
+        protected abstract dynamic VisitIfNode(Node node);
+        protected abstract dynamic VisitBooleanNode(Node node);
+        protected abstract dynamic VisitConditionNode(Node node);
+        protected abstract dynamic VisitVariable(Node node);
+        protected abstract dynamic VisitNoOp(Node node);
     }
 }

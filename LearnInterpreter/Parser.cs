@@ -171,7 +171,8 @@ namespace LearnInterpreter
         {
             Eat(TokenType.Var);
 
-            Variable var = Variable();
+            Token token = currentToken;
+            Eat(TokenType.Identifier);
 
             Node assignment = null;
             if (currentToken.TokenType == TokenType.Assign)
@@ -180,7 +181,7 @@ namespace LearnInterpreter
                 assignment = Expr();
             }
 
-            return new VariableDeclaration(var, assignment);
+            return new VariableDeclaration(token, assignment);
         }
 
         private MethodDeclaration MethodDeclarationStatement()
@@ -241,10 +242,18 @@ namespace LearnInterpreter
 
         private Variable Variable()
         {
-            Variable var = new Variable(currentToken);
+            Token token = currentToken;
             Eat(TokenType.Identifier);
 
-            return var;
+            Node indexNode = null;
+            if (currentToken.TokenType == TokenType.LeftSquareBracket)
+            {
+                Eat(TokenType.LeftSquareBracket);
+                indexNode = Expr();
+                Eat(TokenType.RightSquareBracket);
+            }
+
+            return new Variable(token, indexNode);
         }
 
         private Node Factor()
@@ -262,14 +271,18 @@ namespace LearnInterpreter
 
             if (currentToken.TokenType == TokenType.Integer)
             {
-                Node node = Number();
-                return node;
+                return Number();
             }
 
             if (currentToken.TokenType == TokenType.Plus || currentToken.TokenType == TokenType.Minus)
             {
                 Eat(currentToken.TokenType);
                 return new UnaryOp(token, Factor());
+            }
+
+            if (currentToken.TokenType == TokenType.OpenBracket)
+            {
+                return Array();
             }
 
             if (currentToken.TokenType == TokenType.String)
@@ -280,6 +293,28 @@ namespace LearnInterpreter
 
             Node var = Variable();
             return var;
+        }
+
+        private ArrayNode Array()
+        {
+            Eat(TokenType.OpenBracket);
+
+            List<Node> elements = new List<Node>();
+
+            if (currentToken.TokenType != TokenType.CloseBracket)
+            {
+                elements.Add(Expr());
+
+                while (currentToken.TokenType == TokenType.Comma)
+                {
+                    Eat(TokenType.Comma);
+                    elements.Add(Expr());
+                }
+            }
+
+            Eat(TokenType.CloseBracket);
+
+            return new ArrayNode(elements);
         }
 
         private Node Number()

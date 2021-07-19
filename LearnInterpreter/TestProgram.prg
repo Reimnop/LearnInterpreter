@@ -1,17 +1,27 @@
-﻿// this is my test program
+﻿var numSteps = 10;
 
 var last = 1;
+var factArr = {};
 
-println("Factorial:");
-
-void factorial(var i) {
+void factorial(var i) { // calculates fibonacci sequence and put them in an array
 	last = last * i;
 
-	println(i, "! = ", last);
+	arrayAppend(factArr, last);
 
-	if (i < 20) {
+	if (i < numSteps) {
 		factorial(i + 1);
 	};
 };
 
+void printArr(var i) { // print entire array
+	println(i, "! = ", factArr[i - 1]);
+
+	if (i < numSteps) {
+		printArr(i + 1); // no loop yet so emulate with recursion :P
+	};
+};
+
 factorial(1);
+
+println("Factorial:");
+printArr(1);

@@ -9,11 +9,17 @@ MethodCall           : Identifier LeftParen (Expr (Comma Expr)*)? RightParen
 Method               : void Identifier LeftParen (ParameterList)? RightParen Block
 ParameterList        : Parameter | Parameter Comma ParameterList
 Parameter            : Identifier
-DeclarationStatement : var Variable (Assign Expr)?
+DeclarationStatement : var Identifier (Assign Expr)?
 AssignmentStatement  : Variable Assign Expr
 Empty                : 
 Expr                 : Term ((Plus | Minus) Term)*
 Term                 : Factor ((Mult | Div) Factor)*
-Factor               : String | Plus Factor | Minus Factor | Number | LeftParen Expr RightParen | Variable
+Factor               : String 
+                     | Plus Factor 
+                     | Minus Factor 
+                     | Number 
+                     | LeftParen Expr RightParen 
+                     | Variable
+                     | OpenBracket (Expr (Comma Expr)*)? CloseBracket
 Number               : Integer | Integer Dot Integer
-Variable             : Identifier
+Variable             : Identifier (LeftSquareBracket Expr RightSquareBracket)?

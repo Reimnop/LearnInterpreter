@@ -2,15 +2,15 @@
 {
     public class VariableDeclaration : Node
     {
-        public Variable Variable => _variable;
+        public Token Token => _token;
         public Node Assignment => _assign;
 
-        private Variable _variable;
+        private Token _token;
         private Node _assign;
 
-        public VariableDeclaration(Variable var, Node assign)
+        public VariableDeclaration(Token token, Node assign)
         {
-            _variable = var;
+            _token = token;
             _assign = assign;
         }
     }

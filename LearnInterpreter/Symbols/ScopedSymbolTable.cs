@@ -20,6 +20,7 @@ namespace LearnInterpreter
 
             Define(new BuiltinMethodSymbol("print", Builtin_Print));
             Define(new BuiltinMethodSymbol("println", Builtin_PrintLine));
+            Define(new BuiltinMethodSymbol("arrayAppend", Builtin_ArrayAppend));
         }
 
         private void Builtin_Print(object[] parameters)
@@ -37,6 +38,23 @@ namespace LearnInterpreter
                 Console.Write(param);
             }
             Console.WriteLine();
+        }
+
+        private void Builtin_ArrayAppend(object[] parameters)
+        {
+            if (parameters.Length != 2)
+            {
+                throw new Exception("Invalid parameters!");
+            }
+
+            if (parameters[0] is List<dynamic>)
+            {
+                List<dynamic> list = (List<dynamic>)parameters[0];
+                list.Add(parameters[1]);
+                return;
+            }
+
+            throw new Exception("Invalid parameters!");
         }
 
         public bool TryLookup(string name, out Symbol symbol, bool currentScopeOnly = false)
