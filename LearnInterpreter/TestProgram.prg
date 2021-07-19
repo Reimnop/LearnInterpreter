@@ -7,7 +7,7 @@ println("Factorial:");
 void factorial(var i) {
 	last = last * i;
 
-	print(last, ", ");
+	println(i, "! = ", last);
 
 	if (i < 20) {
 		factorial(i + 1);
