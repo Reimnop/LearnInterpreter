@@ -173,6 +173,11 @@
                 ThrowError(ErrorCodes.IdentifierNotFound, call.Token);
             }
 
+            foreach (Node param in call.Parameters)
+            {
+                Visit(param);
+            }
+
             if (symbol is BuiltinMethodSymbol)
             {
                 call.Symbol = symbol;
@@ -186,13 +191,15 @@
                 ThrowError(ErrorCodes.ParamCountMismatch, call.Token);
             }
 
-            foreach (Node param in call.Parameters)
-            {
-                Visit(param);
-            }
-
             call.Symbol = symbol;
 
+            return null;
+        }
+
+        protected override dynamic VisitReturn(Node node)
+        {
+            ReturnStatement returnStatement = (ReturnStatement)node;
+            Visit(returnStatement.Node);
             return null;
         }
 

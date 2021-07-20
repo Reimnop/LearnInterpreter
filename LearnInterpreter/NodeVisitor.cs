@@ -24,6 +24,7 @@ namespace LearnInterpreter
                 { typeof(VariableDeclaration), VisitVariableDeclaration },
                 { typeof(MethodDeclaration), VisitMethodDeclaration },
                 { typeof(MethodCall), VisitMethodCall },
+                { typeof(ReturnStatement), VisitReturn },
                 { typeof(IfNode), VisitIfNode },
                 { typeof(BooleanNode), VisitBooleanNode },
                 { typeof(ConditionNode), VisitConditionNode },
@@ -49,6 +50,7 @@ namespace LearnInterpreter
         protected abstract dynamic VisitVariableDeclaration(Node node);
         protected abstract dynamic VisitMethodDeclaration(Node node);
         protected abstract dynamic VisitMethodCall(Node node);
+        protected abstract dynamic VisitReturn(Node node);
         protected abstract dynamic VisitIfNode(Node node);
         protected abstract dynamic VisitBooleanNode(Node node);
         protected abstract dynamic VisitConditionNode(Node node);

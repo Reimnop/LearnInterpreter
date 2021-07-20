@@ -104,7 +104,12 @@ namespace LearnInterpreter
 
             foreach (Node child in statements.Children)
             {
-                Visit(child);
+                dynamic value = Visit(child);
+
+                if (value != null)
+                {
+                    return value;
+                }
             }
 
             return null;
@@ -162,6 +167,7 @@ namespace LearnInterpreter
 
             Symbol symbol = call.Symbol;
 
+            dynamic returnValue = null;
             if (symbol is MethodSymbol)
             {
                 MethodSymbol methodSymbol = (MethodSymbol)symbol;
@@ -174,7 +180,7 @@ namespace LearnInterpreter
                     ar.Define(methodSymbol.Parameters[i].Name, Visit(call.Parameters[i]));
                 }
                 callStack.Push(ar);
-                Visit(methodSymbol.Body);
+                returnValue = Visit(methodSymbol.Body);
 
 #if PRINT_DEBUG
                 Console.WriteLine(callStack);
@@ -194,7 +200,13 @@ namespace LearnInterpreter
                 methodSymbol.Method.Invoke(parameters);
             }
 
-            return null;
+            return returnValue;
+        }
+
+        protected override dynamic VisitReturn(Node node)
+        {
+            ReturnStatement returnStatement = (ReturnStatement)node;
+            return Visit(returnStatement.Node);
         }
 
         protected override dynamic VisitIfNode(Node node)
@@ -207,7 +219,13 @@ namespace LearnInterpreter
                 ar.EnclosingRecord = callStack.Peek();
 
                 callStack.Push(ar);
-                Visit(ifNode.Body);
+                dynamic value = Visit(ifNode.Body);
+
+                if (value != null)
+                {
+                    callStack.Pop();
+                    return value;
+                }
 
 #if PRINT_DEBUG
                 Console.WriteLine(callStack);

@@ -1,12 +1,13 @@
 Program              : StatementList | Block
 Block                : OpenBracket StatementList CloseBracket
 StatementList        : Statement | Statement Semicolon StatementList
-Statement            : Method | MethodCall | IfStatement | AssignmentStatement | DeclarationStatement | Empty
+Statement            : Method | MethodCall | ReturnStatement | IfStatement | AssignmentStatement | DeclarationStatement | Empty
 IfStatement          : if LeftParent Boolean RightParen Block
 Boolean              : (true | false) | Condition
 Condition            : Expr (== | > | <) Expr
 MethodCall           : Identifier LeftParen (Expr (Comma Expr)*)? RightParen
 Method               : void Identifier LeftParen (ParameterList)? RightParen Block
+ReturnStatement      : return Expr
 ParameterList        : Parameter | Parameter Comma ParameterList
 Parameter            : Identifier
 DeclarationStatement : var Identifier (Assign Expr)?
@@ -21,5 +22,6 @@ Factor               : String
                      | LeftParen Expr RightParen 
                      | Variable
                      | OpenBracket (Expr (Comma Expr)*)? CloseBracket
+                     | MethodCall
 Number               : Integer | Integer Dot Integer
 Variable             : Identifier (LeftSquareBracket Expr RightSquareBracket)?

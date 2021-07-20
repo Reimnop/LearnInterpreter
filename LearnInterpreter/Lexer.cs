@@ -17,10 +17,11 @@ namespace LearnInterpreter
         private Dictionary<string, Token> reservedKeywords = new Dictionary<string, Token>()
         {
             { "var", new Token(TokenType.Var, "var") },
-            { "void", new Token(TokenType.Void, "void") },
+            { "function", new Token(TokenType.Function, "function") },
             { "if", new Token(TokenType.If, "if") },
             { "true", new Token(TokenType.True, "true") },
-            { "false", new Token(TokenType.False, "false") }
+            { "false", new Token(TokenType.False, "false") },
+            { "return", new Token(TokenType.Return, "return") }
         };
 
         public Lexer(string text)

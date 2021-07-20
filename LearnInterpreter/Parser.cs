@@ -80,13 +80,22 @@ namespace LearnInterpreter
                     return AssignmentStatement();
                 case TokenType.Var:
                     return VariableDeclarationStatement();
-                case TokenType.Void:
+                case TokenType.Function:
                     return MethodDeclarationStatement();
                 case TokenType.If:
                     return IfStatement();
+                case TokenType.Return:
+                    return ReturnStatement();
                 default:
                     return new NoOp();
             }
+        }
+
+        private ReturnStatement ReturnStatement()
+        {
+            Eat(TokenType.Return);
+
+            return new ReturnStatement(Expr());
         }
 
         private IfNode IfStatement()
@@ -186,7 +195,7 @@ namespace LearnInterpreter
 
         private MethodDeclaration MethodDeclarationStatement()
         {
-            Eat(TokenType.Void);
+            Eat(TokenType.Function);
 
             Token token = currentToken;
             Eat(TokenType.Identifier);
@@ -289,6 +298,11 @@ namespace LearnInterpreter
             {
                 Eat(TokenType.String);
                 return new StringNode(token.Value);
+            }
+
+            if (currentToken.TokenType == TokenType.Identifier && lexer.CurrentChar == '(')
+            {
+                return MethodCallStatement();
             }
 
             Node var = Variable();
