@@ -86,9 +86,27 @@ namespace LearnInterpreter
                     return IfStatement();
                 case TokenType.Return:
                     return ReturnStatement();
+                case TokenType.For:
+                    throw new NotImplementedException();
+                case TokenType.While:
+                    return WhileLoop();
                 default:
                     return new NoOp();
             }
+        }
+
+        private WhileLoop WhileLoop()
+        {
+            Eat(TokenType.While);
+            Eat(TokenType.LeftParen);
+
+            BooleanNode node = Boolean();
+
+            Eat(TokenType.RightParen);
+
+            Block body = Block();
+
+            return new WhileLoop(node, body);
         }
 
         private ReturnStatement ReturnStatement()
@@ -137,14 +155,26 @@ namespace LearnInterpreter
             Token op = currentToken;
             switch (op.TokenType)
             {
-                case TokenType.GreaterThan:
-                    Eat(TokenType.GreaterThan);
+                case TokenType.Equal:
+                    Eat(TokenType.Equal);
+                    break;
+                case TokenType.NotEqual:
+                    Eat(TokenType.NotEqual);
                     break;
                 case TokenType.LessThan:
                     Eat(TokenType.LessThan);
                     break;
+                case TokenType.GreaterThan:
+                    Eat(TokenType.GreaterThan);
+                    break;
+                case TokenType.LessThanOrEqualTo:
+                    Eat(TokenType.LessThanOrEqualTo);
+                    break;
+                case TokenType.GreaterThanOrEqualTo:
+                    Eat(TokenType.GreaterThanOrEqualTo);
+                    break;
                 default:
-                    Eat(TokenType.Equal);
+                    ThrowError(ErrorCodes.UnexpectedToken, op);
                     break;
             }
 

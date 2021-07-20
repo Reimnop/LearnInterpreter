@@ -4,6 +4,7 @@
     {
         Program,
         Method,
-        If
+        If,
+        While
     }
 }

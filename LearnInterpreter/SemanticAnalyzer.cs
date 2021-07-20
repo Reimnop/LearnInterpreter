@@ -226,6 +226,29 @@
             return null;
         }
 
+        protected override dynamic VisitWhileLoop(Node node)
+        {
+            WhileLoop whileLoop = (WhileLoop)node;
+
+            whileLoop.ScopeLevel = currentScope.ScopeLevel;
+
+            Visit(whileLoop.Boolean);
+
+#if PRINT_DEBUG
+            System.Console.WriteLine($"Entering scope: {currentScope.ScopeLevel + 1}");
+#endif
+            currentScope = new ScopedSymbolTable(currentScope.ScopeLevel + 1, currentScope);
+            Visit(whileLoop.Body);
+
+#if PRINT_DEBUG
+            System.Console.WriteLine($"Leaving scope {currentScope.ScopeLevel}");
+            System.Console.WriteLine(currentScope);
+#endif
+            currentScope = currentScope.EnclosingScope;
+
+            return null;
+        }
+
         protected override dynamic VisitBooleanNode(Node node)
         {
             return null;

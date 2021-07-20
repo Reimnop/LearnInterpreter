@@ -1,10 +1,12 @@
 Program              : StatementList | Block
 Block                : OpenBracket StatementList CloseBracket
 StatementList        : Statement | Statement Semicolon StatementList
-Statement            : Method | MethodCall | ReturnStatement | IfStatement | AssignmentStatement | DeclarationStatement | Empty
+Statement            : Method | MethodCall | ReturnStatement | IfStatement | ForLoop | WhileLoop | AssignmentStatement | DeclarationStatement | Empty
+ForLoop              : for LeftParen DeclarationStatement Semicolon Condition Semicolon Assign RightParen Block
+WhileLoop            : while LeftParen Boolean RightParen Block
 IfStatement          : if LeftParent Boolean RightParen Block
 Boolean              : (true | false) | Condition
-Condition            : Expr (== | > | <) Expr
+Condition            : Expr (== | != | > | < | <= | >=) Expr
 MethodCall           : Identifier LeftParen (Expr (Comma Expr)*)? RightParen
 Method               : void Identifier LeftParen (ParameterList)? RightParen Block
 ReturnStatement      : return Expr

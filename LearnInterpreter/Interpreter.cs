@@ -236,6 +236,34 @@ namespace LearnInterpreter
             return null;
         }
 
+        protected override dynamic VisitWhileLoop(Node node)
+        {
+            WhileLoop whileLoop = (WhileLoop)node;
+
+            while ((bool)Visit(whileLoop.Boolean))
+            {
+                ActivationRecord ar = new ActivationRecord(ARType.While, whileLoop.ScopeLevel + 1);
+                ar.EnclosingRecord = callStack.Peek();
+
+                callStack.Push(ar);
+
+                dynamic value = Visit(whileLoop.Body);
+
+                if (value != null)
+                {
+                    callStack.Pop();
+                    return value;
+                }
+
+#if PRINT_DEBUG
+                Console.WriteLine(callStack);
+#endif
+                callStack.Pop();
+            }
+
+            return null;
+        }
+
         protected override dynamic VisitBooleanNode(Node node)
         {
             BooleanNode boolean = (BooleanNode)node;
@@ -262,13 +290,21 @@ namespace LearnInterpreter
 
             switch (condition.Op.TokenType)
             {
-                case TokenType.GreaterThan:
-                    return Visit(left) > Visit(right);
+                case TokenType.Equal:
+                    return Visit(left) == Visit(right);
+                case TokenType.NotEqual:
+                    return Visit(left) != Visit(right);
                 case TokenType.LessThan:
                     return Visit(left) < Visit(right);
-                default:
-                    return Visit(left) == Visit(right);
+                case TokenType.GreaterThan:
+                    return Visit(left) > Visit(right);
+                case TokenType.LessThanOrEqualTo:
+                    return Visit(left) <= Visit(right);
+                case TokenType.GreaterThanOrEqualTo:
+                    return Visit(left) >= Visit(right);
             }
+
+            throw new Exception();
         }
 
         protected override dynamic VisitVariable(Node node)

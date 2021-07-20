@@ -21,7 +21,9 @@ namespace LearnInterpreter
             { "if", new Token(TokenType.If, "if") },
             { "true", new Token(TokenType.True, "true") },
             { "false", new Token(TokenType.False, "false") },
-            { "return", new Token(TokenType.Return, "return") }
+            { "return", new Token(TokenType.Return, "return") },
+            { "for", new Token(TokenType.For, "for") },
+            { "while", new Token(TokenType.While, "while") }
         };
 
         public Lexer(string text)
@@ -66,6 +68,27 @@ namespace LearnInterpreter
                     Advance();
                     Advance();
                     return new Token(TokenType.Equal, "==", line, column);
+                }
+
+                if (_currentChar == '!' && Peek() == '=')
+                {
+                    Advance();
+                    Advance();
+                    return new Token(TokenType.NotEqual, "!=", line, column);
+                }
+
+                if (_currentChar == '<' && Peek() == '=')
+                {
+                    Advance();
+                    Advance();
+                    return new Token(TokenType.LessThanOrEqualTo, "<=", line, column);
+                }
+
+                if (_currentChar == '>' && Peek() == '=')
+                {
+                    Advance();
+                    Advance();
+                    return new Token(TokenType.GreaterThanOrEqualTo, ">=", line, column);
                 }
 
                 //deal with single char tokens

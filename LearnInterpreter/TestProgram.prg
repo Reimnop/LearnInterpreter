@@ -6,4 +6,11 @@
 	return factorial(a - 1) * a;
 };
 
-println("20! = ", factorial(20));
+var a = {};
+
+var i = 1;
+
+while (i <= 1000000) {
+	arrayAppend(a, i * i);
+	i = i + 1;
+};
