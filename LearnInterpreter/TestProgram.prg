@@ -3,7 +3,7 @@
 var last = 1;
 var factArr = {};
 
-void factorial(var i) { // calculates fibonacci sequence and put them in an array
+void factorial(var i) { // calculates factorial and put them in an array
 	last = last * i;
 
 	arrayAppend(factArr, last);
